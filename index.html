@@ -3622,7 +3622,10 @@ function renderAttachments(attachments, questionId) {
 
             // Sync to Supabase if turbo mode is active
             if (turboModeActive) {
-                pushAnswerToSupabase(currentUsername, questionId, value, timestampNow)
+                // Use Railway if available, otherwise direct Supabase
+                const syncFunction = window.submitAnswerViaRailway || pushAnswerToSupabase;
+
+                syncFunction(currentUsername, questionId, value, timestampNow)
                     .then(success => {
                         if (success) {
                             console.log(`✅ Answer synced to cloud for ${questionId}`);
