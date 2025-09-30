@@ -149,7 +149,7 @@ function handleWebSocketMessage(data) {
 async function submitAnswerViaRailway(username, questionId, answerValue, timestamp) {
     if (!USE_RAILWAY) {
         // Fall back to direct Supabase
-        return pushAnswerToSupabase(username, questionId, answerValue, timestamp);
+        return window.originalPushAnswer(username, questionId, answerValue, timestamp);
     }
 
     try {
@@ -170,14 +170,14 @@ async function submitAnswerViaRailway(username, questionId, answerValue, timesta
 
         if (result.success) {
             console.log(`✅ Answer synced via Railway (broadcast to ${result.broadcast} clients)`);
-            return true;
+            return true;  // SUCCESS - Don't fall back!
         } else {
-            throw new Error(result.error);
+            throw new Error(result.error || 'Railway sync failed');
         }
     } catch (error) {
-        console.error('Railway submit failed:', error);
-        // Fall back to direct Supabase
-        return pushAnswerToSupabase(username, questionId, answerValue, timestamp);
+        console.error('Railway submit failed, falling back to direct Supabase:', error);
+        // Only fall back if Railway actually failed
+        return window.originalPushAnswer(username, questionId, answerValue, timestamp);
     }
 }
 
@@ -289,9 +289,9 @@ async function batchSubmitViaRailway(answers) {
 if (USE_RAILWAY) {
     console.log('🚂 Railway mode enabled - overriding sync functions');
 
-    // Store original functions
-    const originalPushAnswer = window.pushAnswerToSupabase;
-    const originalPullPeerData = window.pullPeerDataFromSupabase;
+    // Store original functions BEFORE overriding
+    window.originalPushAnswer = window.pushAnswerToSupabase;
+    window.originalPullPeerData = window.pullPeerDataFromSupabase;
 
     // Override with Railway-enhanced versions
     window.pushAnswerToSupabase = submitAnswerViaRailway;
