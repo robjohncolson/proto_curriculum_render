@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase_config.js"></script>
     <script src="js/charts.js"></script>
+    <script src="sync_diagnostics.js"></script>
 
 </head>
 <body>
@@ -169,6 +170,7 @@
         async function testSupabaseConnection() {
             if (!supabase) {
                 turboModeActive = false;
+                console.log('No Supabase client available');
                 return false;
             }
 
@@ -185,14 +187,21 @@
                     .limit(1);
 
                 // Race between the query and timeout
-                await Promise.race([testQuery, timeoutPromise]);
+                const result = await Promise.race([testQuery, timeoutPromise]);
+
+                // Check if the query was successful
+                if (result.error) {
+                    console.log('Supabase test query error:', result.error);
+                    turboModeActive = false;
+                    return false;
+                }
 
                 turboModeActive = true;
                 console.log('✅ Turbo mode active - Supabase connected');
                 return true;
             } catch (error) {
                 turboModeActive = false;
-                console.log('🔌 Turbo mode inactive - Using offline mode');
+                console.log('🔌 Turbo mode inactive - Using offline mode:', error.message);
                 return false;
             }
         }
@@ -202,12 +211,23 @@
             if (!turboModeActive || !supabase) return false;
 
             try {
-                const { error } = await supabase.rpc('upsert_answer', {
-                    p_username: username,
-                    p_question_id: questionId,
-                    p_answer_value: answerValue,
-                    p_timestamp: timestamp
-                });
+                // Ensure timestamp is a number (Unix milliseconds)
+                if (typeof timestamp === 'string') {
+                    timestamp = new Date(timestamp).getTime();
+                }
+
+                // Supabase v2 upsert syntax - array of objects, onConflict as separate parameter
+                const { data, error } = await supabase
+                    .from('answers')
+                    .upsert(
+                        [{
+                            username: username,
+                            question_id: questionId,
+                            answer_value: answerValue,
+                            timestamp: timestamp
+                        }],
+                        { onConflict: 'username,question_id' }
+                    );
 
                 if (error) throw error;
                 console.log(`✅ Synced answer for ${questionId} to cloud`);
@@ -215,6 +235,33 @@
             } catch (error) {
                 console.log(`⚠️ Failed to sync answer: ${error.message}`);
                 return false;
+            }
+        }
+
+        // Batch push answers to Supabase (more efficient for bulk sync)
+        async function batchPushAnswersToSupabase(answerBatch) {
+            if (!turboModeActive || !supabase || answerBatch.length === 0) return 0;
+
+            try {
+                // Ensure all timestamps are numbers
+                const processedBatch = answerBatch.map(answer => ({
+                    ...answer,
+                    timestamp: typeof answer.timestamp === 'string'
+                        ? new Date(answer.timestamp).getTime()
+                        : answer.timestamp
+                }));
+
+                // Supabase can handle batch upserts efficiently
+                const { data, error } = await supabase
+                    .from('answers')
+                    .upsert(processedBatch, { onConflict: 'username,question_id' });
+
+                if (error) throw error;
+                console.log(`✅ Batch synced ${processedBatch.length} answers to cloud`);
+                return processedBatch.length;
+            } catch (error) {
+                console.log(`⚠️ Failed to batch sync: ${error.message}`);
+                return 0;
             }
         }
 
@@ -266,31 +313,119 @@
             }
         }
 
-        // Sync all local answers to Supabase (for initial sync)
+        // Sync all local answers to Supabase (for initial sync - includes ALL users)
         async function syncAllLocalAnswersToSupabase() {
             if (!turboModeActive || !supabase) return false;
 
             try {
-                const currentUser = localStorage.getItem('consensusUsername');
-                if (!currentUser) return false;
+                // Find all answer keys in localStorage (for all users)
+                const allKeys = Object.keys(localStorage);
+                const answerKeys = allKeys.filter(key => key.startsWith('answers_'));
 
-                const answersKey = `answers_${currentUser}`;
-                const answers = JSON.parse(localStorage.getItem(answersKey) || '{}');
+                console.log(`Found ${answerKeys.length} users with local data to sync`);
 
-                let syncCount = 0;
-                for (const [questionId, answerData] of Object.entries(answers)) {
-                    const value = answerData.value || answerData;
-                    const timestamp = answerData.timestamp || Date.now();
+                let totalSyncCount = 0;
+                let totalAnswerCount = 0;
+                let userErrors = {};
 
-                    if (await pushAnswerToSupabase(currentUser, questionId, value, timestamp)) {
-                        syncCount++;
+                // Sync each user's answers
+                for (const answerKey of answerKeys) {
+                    const username = answerKey.replace('answers_', '');
+                    const answers = JSON.parse(localStorage.getItem(answerKey) || '{}');
+                    const answerCount = Object.keys(answers).length;
+
+                    if (answerCount === 0) continue;
+
+                    console.log(`Syncing ${answerCount} answers for user: ${username}`);
+                    totalAnswerCount += answerCount;
+
+                    let userSyncCount = 0;
+                    let errors = [];
+
+                    for (const [questionId, answerData] of Object.entries(answers)) {
+                        const value = answerData.value || answerData;
+
+                        // Convert timestamp to Unix milliseconds if it's a date string
+                        let timestamp = answerData.timestamp || Date.now();
+                        if (typeof timestamp === 'string') {
+                            timestamp = new Date(timestamp).getTime();
+                        }
+
+                        if (await pushAnswerToSupabase(username, questionId, value, timestamp)) {
+                            userSyncCount++;
+                            totalSyncCount++;
+                        } else {
+                            errors.push(questionId);
+                        }
+                    }
+
+                    if (errors.length > 0) {
+                        userErrors[username] = errors;
+                    }
+
+                    console.log(`  → Synced ${userSyncCount}/${answerCount} for ${username}`);
+                }
+
+                if (Object.keys(userErrors).length > 0) {
+                    console.log(`⚠️ Some sync errors occurred:`, userErrors);
+                }
+
+                console.log(`✅ Total: Synced ${totalSyncCount}/${totalAnswerCount} answers across ${answerKeys.length} users`);
+                return totalSyncCount > 0;
+            } catch (error) {
+                console.log(`⚠️ Failed to sync local answers: ${error.message}`);
+                return false;
+            }
+        }
+
+        // Sync ALL data from classData structure (alternative data source)
+        async function syncClassDataToSupabase() {
+            if (!turboModeActive || !supabase) return false;
+
+            try {
+                const classData = JSON.parse(localStorage.getItem('classData') || '{}');
+                if (!classData.users) {
+                    console.log('No classData.users found');
+                    return false;
+                }
+
+                const users = Object.keys(classData.users);
+                console.log(`Found ${users.length} users in classData to sync`);
+
+                let totalSyncCount = 0;
+                let totalAnswerCount = 0;
+
+                for (const username of users) {
+                    const userData = classData.users[username];
+                    if (!userData.answers) continue;
+
+                    const answers = userData.answers;
+                    const answerCount = Object.keys(answers).length;
+
+                    if (answerCount === 0) continue;
+
+                    console.log(`Syncing ${answerCount} answers from classData for: ${username}`);
+                    totalAnswerCount += answerCount;
+
+                    for (const [questionId, answerData] of Object.entries(answers)) {
+                        const value = answerData.value || answerData;
+
+                        // Convert timestamp to Unix milliseconds if it's a date string
+                        let timestamp = answerData.timestamp || Date.now();
+                        if (typeof timestamp === 'string') {
+                            timestamp = new Date(timestamp).getTime();
+                        }
+
+                        if (await pushAnswerToSupabase(username, questionId, value, timestamp)) {
+                            totalSyncCount++;
+                        }
                     }
                 }
 
-                console.log(`✅ Synced ${syncCount} answers to cloud`);
-                return true;
+                console.log(`✅ Synced ${totalSyncCount}/${totalAnswerCount} answers from classData`);
+                return totalSyncCount > 0;
             } catch (error) {
-                console.log(`⚠️ Failed to sync local answers: ${error.message}`);
+                console.log(`⚠️ Failed to sync classData: ${error.message}`);
                 return false;
             }
         }
@@ -429,12 +564,90 @@
             return null;
         }
 
+        // Smart sync - only sync new or updated answers
+        async function smartSyncWithSupabase() {
+            if (!turboModeActive || !supabase) return false;
+
+            try {
+                console.log('🔄 Starting smart sync with Supabase...');
+
+                // First, get all existing data from Supabase
+                const { data: supabaseData, error } = await supabase
+                    .from('answers')
+                    .select('*');
+
+                if (error) throw error;
+
+                // Create a map of existing Supabase data for quick lookup
+                const supabaseMap = {};
+                supabaseData.forEach(answer => {
+                    const key = `${answer.username}_${answer.question_id}`;
+                    supabaseMap[key] = answer;
+                });
+
+                // Now sync all local data, checking for updates
+                const allKeys = Object.keys(localStorage);
+                const answerKeys = allKeys.filter(key => key.startsWith('answers_'));
+
+                let newCount = 0;
+                let updateCount = 0;
+                let skipCount = 0;
+                let totalCount = 0;
+
+                for (const answerKey of answerKeys) {
+                    const username = answerKey.replace('answers_', '');
+                    const answers = JSON.parse(localStorage.getItem(answerKey) || '{}');
+
+                    for (const [questionId, answerData] of Object.entries(answers)) {
+                        totalCount++;
+                        const value = answerData.value || answerData;
+
+                        // Convert timestamp to Unix milliseconds if it's a date string
+                        let timestamp = answerData.timestamp || Date.now();
+                        if (typeof timestamp === 'string') {
+                            timestamp = new Date(timestamp).getTime();
+                        }
+
+                        const key = `${username}_${questionId}`;
+                        const existingAnswer = supabaseMap[key];
+
+                        // Check if we need to sync this answer
+                        if (!existingAnswer) {
+                            // New answer - sync it
+                            if (await pushAnswerToSupabase(username, questionId, value, timestamp)) {
+                                newCount++;
+                            }
+                        } else if (existingAnswer.timestamp < timestamp) {
+                            // Local is newer - update Supabase
+                            if (await pushAnswerToSupabase(username, questionId, value, timestamp)) {
+                                updateCount++;
+                            }
+                        } else {
+                            // Supabase is current or newer - skip
+                            skipCount++;
+                        }
+                    }
+                }
+
+                console.log(`✅ Smart sync complete:`);
+                console.log(`   - ${newCount} new answers added`);
+                console.log(`   - ${updateCount} answers updated`);
+                console.log(`   - ${skipCount} answers already current`);
+                console.log(`   - ${totalCount} total answers processed`);
+
+                return true;
+            } catch (error) {
+                console.log(`⚠️ Smart sync failed: ${error.message}`);
+                return false;
+            }
+        }
+
         // Initialize turbo mode on page load
         async function initializeTurboMode() {
             // Test connection
             if (await testSupabaseConnection()) {
-                // Sync local answers to cloud
-                await syncAllLocalAnswersToSupabase();
+                // Do a smart sync (only sync what's needed)
+                await smartSyncWithSupabase();
 
                 // Pull initial peer data
                 await pullPeerDataFromSupabase();

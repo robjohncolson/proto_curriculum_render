@@ -1,6 +1,6 @@
 {
-  "exportTime": "2025-09-29T02:22:20.856Z",
-  "totalStudents": 29,
+  "exportTime": "2025-09-30T03:57:38.542Z",
+  "totalStudents": 30,
   "students": {
     "Apple_Monkey": {
       "answers": {
@@ -293,6 +293,18 @@
         "U1-L8-Q03": {
           "value": "E",
           "timestamp": "2025-09-26T13:13:55.413Z"
+        },
+        "U1-L9-Q01": {
+          "value": "B",
+          "timestamp": "2025-09-29T13:40:31.550Z"
+        },
+        "U1-L9-Q02": {
+          "value": "B",
+          "timestamp": "2025-09-29T17:18:39.697Z"
+        },
+        "U1-L9-Q03": {
+          "value": "B",
+          "timestamp": "2025-09-29T17:26:14.776Z"
         }
       },
       "reasons": {
@@ -312,7 +324,10 @@
         "U1-L7-Q06": "Using the Upper Bound formula, which is Q3 + 1.5 x IQR, it equals 47. And 43 is not greater than 47.",
         "U1-L8-Q01": "well cause like the line is in the middle of 30 and 40, so the Q3 number is 35.",
         "U1-L8-Q02": "I'd say 50 because the median line (which is the number directly in the middle, the very middle sample, splits the entire sample evenly, although they are most likely clustered around 48 - 58, the median reaches directly at 48. So around half are equal to or above that height.",
-        "U1-L8-Q03": "A, B, and D are incorrect, it is not skewed right or symmetric. That leaves C and E. I believe the mean is likely greater than the median because the average is a lot higher due to the cluster around the higher values whereas median is rarely affected by that."
+        "U1-L8-Q03": "A, B, and D are incorrect, it is not skewed right or symmetric. That leaves C and E. I believe the mean is likely greater than the median because the average is a lot higher due to the cluster around the higher values whereas median is rarely affected by that.",
+        "U1-L9-Q01": "The IQR matches on both because the ends of the box (Q1 and Q3) are the exact same, so regardless of the numbers they would both have the same IQR.",
+        "U1-L9-Q02": "I'm choosing B because I was in between A and B and B seems more likely due to the range of Mining Distrubances being lower but higher in numbers, therefore possibly making its median higher.",
+        "U1-L9-Q03": "IQR = 2 < 4 \nRange = 12 < 17"
       },
       "timestamps": {
         "U1-L2-Q01": 1757683639793,
@@ -341,7 +356,10 @@
         "U1-L7-Q06": "2025-09-25T14:24:18.882Z",
         "U1-L8-Q01": "2025-09-26T13:08:19.657Z",
         "U1-L8-Q02": "2025-09-26T13:10:28.486Z",
-        "U1-L8-Q03": "2025-09-26T13:13:55.413Z"
+        "U1-L8-Q03": "2025-09-26T13:13:55.413Z",
+        "U1-L9-Q01": "2025-09-29T13:40:31.550Z",
+        "U1-L9-Q02": "2025-09-29T17:18:39.698Z",
+        "U1-L9-Q03": "2025-09-29T17:26:14.778Z"
       },
       "attempts": {
         "U1-L2-Q01": 1,
@@ -370,7 +388,10 @@
         "U1-L7-Q06": 1,
         "U1-L8-Q01": 1,
         "U1-L8-Q02": 1,
-        "U1-L8-Q03": 1
+        "U1-L8-Q03": 1,
+        "U1-L9-Q01": 1,
+        "U1-L9-Q02": 2,
+        "U1-L9-Q03": 1
       }
     },
     "Apricot_Dog": {
@@ -446,6 +467,54 @@
         "U1-L6-Q03": {
           "value": "E",
           "timestamp": "2025-09-19T01:51:39.308Z"
+        },
+        "U1-L7-Q01": {
+          "value": "B",
+          "timestamp": "2025-09-26T13:09:09.589Z"
+        },
+        "U1-L7-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-26T13:09:21.440Z"
+        },
+        "U1-L7-Q03": {
+          "value": "A",
+          "timestamp": "2025-09-26T13:09:42.009Z"
+        },
+        "U1-L7-Q04": {
+          "value": "B",
+          "timestamp": "2025-09-26T13:09:51.303Z"
+        },
+        "U1-L7-Q05": {
+          "value": "A",
+          "timestamp": "2025-09-26T13:09:59.257Z"
+        },
+        "U1-L7-Q06": {
+          "value": "D",
+          "timestamp": "2025-09-26T13:10:07.595Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-26T13:18:28.801Z"
+        },
+        "U1-L8-Q02": {
+          "value": "E",
+          "timestamp": "2025-09-26T13:59:22.796Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-26T13:57:13.898Z"
+        },
+        "U1-L9-Q01": {
+          "value": "B",
+          "timestamp": "2025-09-29T13:42:25.848Z"
+        },
+        "U1-L9-Q03": {
+          "value": "B",
+          "timestamp": "2025-09-29T22:06:39.355Z"
+        },
+        "U1-L9-Q02": {
+          "value": "B",
+          "timestamp": "2025-09-29T22:11:53.956Z"
         }
       },
       "reasons": {
@@ -466,7 +535,10 @@
         "U1-L5-Q03": "",
         "U1-L6-Q01": "Outliers are present when there is a large gap between values in the distribution.",
         "U1-L6-Q02": "",
-        "U1-L6-Q03": "It has two peaks where most values are located, being 60 and 70."
+        "U1-L6-Q03": "It has two peaks where most values are located, being 60 and 70.",
+        "U1-L8-Q02": "SInce most people or all reacged the requirement of hieght for rides.",
+        "U1-L8-Q01": "Since it's the median, it's the most typical miles per gas.",
+        "U1-L9-Q02": "The earthquake disturbances are less than the mining disturbances in the center of the histograms."
       },
       "timestamps": {
         "U1-L3-Q01": 1757684012225,
@@ -486,7 +558,19 @@
         "U1-L5-Q03": "2025-09-19T01:34:16.315Z",
         "U1-L6-Q01": "2025-09-19T01:46:03.942Z",
         "U1-L6-Q02": "2025-09-19T01:49:20.341Z",
-        "U1-L6-Q03": "2025-09-19T01:51:39.308Z"
+        "U1-L6-Q03": "2025-09-19T01:51:39.308Z",
+        "U1-L7-Q01": "2025-09-26T13:09:09.589Z",
+        "U1-L7-Q02": "2025-09-26T13:09:21.440Z",
+        "U1-L7-Q03": "2025-09-26T13:09:42.009Z",
+        "U1-L7-Q04": "2025-09-26T13:09:51.304Z",
+        "U1-L7-Q05": "2025-09-26T13:09:59.257Z",
+        "U1-L7-Q06": "2025-09-26T13:10:07.595Z",
+        "U1-L8-Q03": "2025-09-26T13:18:28.801Z",
+        "U1-L8-Q02": "2025-09-26T13:59:22.796Z",
+        "U1-L8-Q01": "2025-09-26T13:57:13.898Z",
+        "U1-L9-Q01": "2025-09-29T13:42:25.848Z",
+        "U1-L9-Q03": "2025-09-29T22:06:39.355Z",
+        "U1-L9-Q02": "2025-09-29T22:11:53.956Z"
       },
       "attempts": {
         "U1-L3-Q01": 1,
@@ -506,7 +590,19 @@
         "U1-L5-Q03": 1,
         "U1-L6-Q01": 1,
         "U1-L6-Q02": 1,
-        "U1-L6-Q03": 1
+        "U1-L6-Q03": 1,
+        "U1-L7-Q01": 1,
+        "U1-L7-Q02": 1,
+        "U1-L7-Q03": 1,
+        "U1-L7-Q04": 1,
+        "U1-L7-Q05": 1,
+        "U1-L7-Q06": 1,
+        "U1-L8-Q03": 1,
+        "U1-L8-Q02": 3,
+        "U1-L8-Q01": 1,
+        "U1-L9-Q01": 1,
+        "U1-L9-Q03": 1,
+        "U1-L9-Q02": 2
       }
     },
     "Apricot_Fox": {
@@ -618,6 +714,18 @@
         "U1-L8-Q01": {
           "value": "C",
           "timestamp": "2025-09-26T13:19:40.198Z"
+        },
+        "U1-L9-Q03": {
+          "value": "D",
+          "timestamp": "2025-09-29T13:46:23.535Z"
+        },
+        "U1-L9-Q02": {
+          "value": "B",
+          "timestamp": "2025-09-29T13:46:25.896Z"
+        },
+        "U1-L9-Q01": {
+          "value": "B",
+          "timestamp": "2025-09-29T13:46:28.871Z"
         }
       },
       "reasons": {
@@ -654,7 +762,10 @@
         "U1-L7-Q06": "2025-09-25T14:31:59.803Z",
         "U1-L8-Q03": "2025-09-26T13:19:35.125Z",
         "U1-L8-Q02": "2025-09-26T13:19:38.140Z",
-        "U1-L8-Q01": "2025-09-26T13:19:40.198Z"
+        "U1-L8-Q01": "2025-09-26T13:19:40.198Z",
+        "U1-L9-Q03": "2025-09-29T13:46:23.535Z",
+        "U1-L9-Q02": "2025-09-29T13:46:25.896Z",
+        "U1-L9-Q01": "2025-09-29T13:46:28.871Z"
       },
       "attempts": {
         "U1-L3-Q01": 1,
@@ -683,7 +794,10 @@
         "U1-L7-Q06": 1,
         "U1-L8-Q03": 1,
         "U1-L8-Q02": 1,
-        "U1-L8-Q01": 1
+        "U1-L8-Q01": 1,
+        "U1-L9-Q03": 1,
+        "U1-L9-Q02": 1,
+        "U1-L9-Q01": 1
       }
     },
     "Apricot_Horse": {
@@ -967,6 +1081,18 @@
         "U1-L7-Q06": {
           "value": "D",
           "timestamp": "2025-09-27T03:45:36.664Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-30T02:12:55.145Z"
+        },
+        "U1-L8-Q02": {
+          "value": "C",
+          "timestamp": "2025-09-30T02:13:17.055Z"
+        },
+        "U1-L8-Q03": {
+          "value": "D",
+          "timestamp": "2025-09-30T02:14:16.929Z"
         }
       },
       "reasons": {
@@ -990,7 +1116,10 @@
         "U1-L7-Q03": "Because the average of both B and C is 290,600",
         "U1-L7-Q04": "19.3 is the only outlier in this question",
         "U1-L7-Q05": "77% of 1000 is 770",
-        "U1-L7-Q06": "The reason being 89 is greater than 43"
+        "U1-L7-Q06": "The reason being 89 is greater than 43",
+        "U1-L8-Q01": "The reason as to why I believed it's 35 is because the other three answers are apart of the IQR and the last one is the max.",
+        "U1-L8-Q02": "The reasoning being that a huge chunk of the people there can attend. It's more than 25% and it's less than 75 and 100%",
+        "U1-L8-Q03": "The reason being that the graph IS skewed to the right meaning the mean was most likely increased while the median stayed the same"
       },
       "timestamps": {
         "U1-L3-Q01": 1757699076408,
@@ -1013,7 +1142,10 @@
         "U1-L7-Q03": "2025-09-26T17:25:40.787Z",
         "U1-L7-Q04": "2025-09-26T17:44:05.437Z",
         "U1-L7-Q05": "2025-09-26T18:13:14.299Z",
-        "U1-L7-Q06": "2025-09-27T03:45:36.664Z"
+        "U1-L7-Q06": "2025-09-27T03:45:36.664Z",
+        "U1-L8-Q01": "2025-09-30T02:12:55.145Z",
+        "U1-L8-Q02": "2025-09-30T02:13:17.055Z",
+        "U1-L8-Q03": "2025-09-30T02:14:16.929Z"
       },
       "attempts": {
         "U1-L3-Q01": 1,
@@ -1036,7 +1168,10 @@
         "U1-L7-Q03": 1,
         "U1-L7-Q04": 1,
         "U1-L7-Q05": 1,
-        "U1-L7-Q06": 1
+        "U1-L7-Q06": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q02": 2,
+        "U1-L8-Q03": 1
       }
     },
     "Banana_Goat": {
@@ -1136,6 +1271,18 @@
         "U1-L7-Q06": {
           "value": "D",
           "timestamp": "2025-09-24T15:48:19.529Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:02:31.766Z"
+        },
+        "U1-L8-Q02": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:05:54.522Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:10:26.476Z"
         }
       },
       "reasons": {
@@ -1147,7 +1294,10 @@
         "U1-L7-Q03": "It is an a data set with an even amount of data points, so we must take the average of the two middle values.",
         "U1-L7-Q04": "To find an outlier using the mean and standard deviation, you would multiply the standard deviation by 2 and then both add and subtract from the mean. This will be the maximum and minimum value that a value can be without being considered an outlier.",
         "U1-L7-Q05": "When dealing with a percentile, being in the 77th percentile means that you placed at that certain score and there were likely people that performed less than you.",
-        "U1-L7-Q06": "The IQR is 38-32, which = 6. 1.5 * 6 = 9, and seeing if a value is an outlier would be (Q1 - 1.5*IQR) or (Q3 - 1.5*IQR)"
+        "U1-L7-Q06": "The IQR is 38-32, which = 6. 1.5 * 6 = 9, and seeing if a value is an outlier would be (Q1 - 1.5*IQR) or (Q3 - 1.5*IQR)",
+        "U1-L8-Q01": "Each section of a box plot represents 25% of data. If we're talking about the top 25%, it would be referencing the right most section of the box plot.",
+        "U1-L8-Q02": "Each section of a box plot represents 25% of data.  Since people have to be at least 48 inches, the portions above the median is what we're looking for.",
+        "U1-L8-Q03": "The data is evidently skewed left just by looking at the distribution. What makes C a better answer than E though is since there is so much data, the average will likely be lessened as a result. This means that the mean isn't very likely to stick around the 35-40 range, whereas the median will be."
       },
       "timestamps": {
         "U1-L3-Q01": 1757699196915,
@@ -1173,7 +1323,10 @@
         "U1-L7-Q03": "2025-09-24T15:31:54.154Z",
         "U1-L7-Q04": "2025-09-24T15:36:24.991Z",
         "U1-L7-Q05": "2025-09-24T15:43:55.608Z",
-        "U1-L7-Q06": "2025-09-24T15:48:19.530Z"
+        "U1-L7-Q06": "2025-09-24T15:48:19.530Z",
+        "U1-L8-Q01": "2025-09-29T18:02:31.766Z",
+        "U1-L8-Q02": "2025-09-29T18:05:54.522Z",
+        "U1-L8-Q03": "2025-09-29T18:10:26.476Z"
       },
       "attempts": {
         "U1-L3-Q01": 1,
@@ -1199,7 +1352,10 @@
         "U1-L7-Q03": 1,
         "U1-L7-Q04": 1,
         "U1-L7-Q05": 1,
-        "U1-L7-Q06": 1
+        "U1-L7-Q06": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q03": 2
       }
     },
     "Berry_Iguana": {
@@ -1368,6 +1524,42 @@
         "U1-L6-Q03": {
           "value": "D",
           "timestamp": "2025-09-24T15:26:53.195Z"
+        },
+        "U1-L7-Q01": {
+          "value": "B",
+          "timestamp": "2025-09-26T17:26:16.191Z"
+        },
+        "U1-L7-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-26T17:27:52.668Z"
+        },
+        "U1-L7-Q03": {
+          "value": "B",
+          "timestamp": "2025-09-26T17:28:41.051Z"
+        },
+        "U1-L7-Q04": {
+          "value": "B",
+          "timestamp": "2025-09-26T17:29:13.735Z"
+        },
+        "U1-L7-Q05": {
+          "value": "A",
+          "timestamp": "2025-09-26T17:29:52.284Z"
+        },
+        "U1-L7-Q06": {
+          "value": "D",
+          "timestamp": "2025-09-26T17:30:25.314Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:05:41.305Z"
+        },
+        "U1-L8-Q02": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:06:02.920Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:06:48.218Z"
         }
       },
       "reasons": {
@@ -1385,7 +1577,16 @@
         "U1-L4-Q06": "",
         "U1-L5-Q01": "",
         "U1-L5-Q02": "",
-        "U1-L5-Q03": ""
+        "U1-L5-Q03": "",
+        "U1-L7-Q01": "The mean is not resistant to outliers, so it is likely to change. The median is resistant to outliers,\nso the addition of the outlier will not greatly (if at all) change the median’s value",
+        "U1-L7-Q02": "I guessed I dont know",
+        "U1-L7-Q03": "Correct. To find the median of the list of data, first order the data from least to greatest: 250,600;\n275,800; 275,800; 281,900; 284,700; 295,000; 302,100; 305,400. Since there are 8 values, an even\nnumber, the median is the average of the 2 values in the middle of the ordered list. The median selling price of the houses is $283,300",
+        "U1-L7-Q04": "This value is an outlier, because it is located more than 2 standard deviations below the mean.\nOf the five values that are listed in the options, this value is the greatest value that is an outlier.",
+        "U1-L7-Q05": ". This is a correct interpretation of the percentile of the distribution. 77% of the scores were\nless than or equal to 68, and 77% of 1,000 scores is 770 scores",
+        "U1-L7-Q06": "The is , which is 38 minus 34 or 4. An upper outlier exists if it is greater than\n, but the value 43 is not greater than .",
+        "U1-L8-Q01": "The value 35 is the third quartile, meaning at least 25% of the cars get 35 miles per gallon or\nmore.",
+        "U1-L8-Q02": "The median appears to be halfway between 46 and 50 at 48. So approximately 50% of the\npeople met the height requirement.",
+        "U1-L8-Q03": "The distribution is skewed to the left because the left tail is longer than the right tail. The mean\ntends to be less than the median in distributions that are skewed to the left"
       },
       "timestamps": {
         "U1-L2-Q03": "2025-09-17T19:21:10.635Z",
@@ -1405,7 +1606,16 @@
         "U1-L5-Q03": "2025-09-17T19:35:06.676Z",
         "U1-L6-Q01": "2025-09-24T15:26:45.173Z",
         "U1-L6-Q02": "2025-09-24T15:26:49.560Z",
-        "U1-L6-Q03": "2025-09-24T15:26:53.195Z"
+        "U1-L6-Q03": "2025-09-24T15:26:53.195Z",
+        "U1-L7-Q01": "2025-09-26T17:26:16.191Z",
+        "U1-L7-Q02": "2025-09-26T17:27:52.668Z",
+        "U1-L7-Q03": "2025-09-26T17:28:41.051Z",
+        "U1-L7-Q04": "2025-09-26T17:29:13.735Z",
+        "U1-L7-Q05": "2025-09-26T17:29:52.284Z",
+        "U1-L7-Q06": "2025-09-26T17:30:25.314Z",
+        "U1-L8-Q01": "2025-09-29T18:05:41.305Z",
+        "U1-L8-Q02": "2025-09-29T18:06:02.920Z",
+        "U1-L8-Q03": "2025-09-29T18:06:48.218Z"
       },
       "attempts": {
         "U1-L2-Q03": 1,
@@ -1425,7 +1635,16 @@
         "U1-L5-Q03": 1,
         "U1-L6-Q01": 1,
         "U1-L6-Q02": 1,
-        "U1-L6-Q03": 1
+        "U1-L6-Q03": 1,
+        "U1-L7-Q01": 1,
+        "U1-L7-Q02": 1,
+        "U1-L7-Q03": 1,
+        "U1-L7-Q04": 1,
+        "U1-L7-Q05": 1,
+        "U1-L7-Q06": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q03": 1
       }
     },
     "Banana_Fox": {
@@ -1938,12 +2157,48 @@
           "timestamp": "2025-09-20T01:53:09.480Z"
         },
         "U1-L6-Q02": {
-          "value": "C",
-          "timestamp": "2025-09-20T02:25:50.703Z"
+          "value": "D",
+          "timestamp": "2025-09-24T15:43:40.425Z"
         },
         "U1-L6-Q01": {
           "value": "B",
           "timestamp": "2025-09-20T02:46:16.219Z"
+        },
+        "U1-L7-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-26T17:34:53.962Z"
+        },
+        "U1-L7-Q03": {
+          "value": "B",
+          "timestamp": "2025-09-26T17:44:57.676Z"
+        },
+        "U1-L7-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-26T17:51:49.601Z"
+        },
+        "U1-L7-Q04": {
+          "value": "B",
+          "timestamp": "2025-09-30T00:18:25.696Z"
+        },
+        "U1-L7-Q05": {
+          "value": "A",
+          "timestamp": "2025-09-30T00:25:28.176Z"
+        },
+        "U1-L7-Q06": {
+          "value": "D",
+          "timestamp": "2025-09-30T00:28:38.686Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-30T00:34:27.903Z"
+        },
+        "U1-L8-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-30T00:41:52.076Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-30T00:44:34.817Z"
         }
       },
       "reasons": {
@@ -1963,8 +2218,17 @@
         "U1-L5-Q02": "E can be considered discrete because the number of books that a person finished reading last month would have to be a whole number because it would only count a book if a person full finished it, it would not count half read books or 75% read books.",
         "U1-L5-Q03": "B is correct because the number of video games sold is a numerical value for counted quantity and it also continuous because you can't sell 15.6 amount of video games, the number has to be a whole number (has to have gaps).",
         "U1-L6-Q03": "The majority of the data plots are on the left side of the dot plot chart making is a distribution that is roughly skewed right.",
-        "U1-L6-Q02": "The number of bars would need to stay the same because it show the amount of dollars spent meaning that even if the interval size is decreased the only thing changing are the width of the bars and their heights.",
-        "U1-L6-Q01": "I think B is correct because if you have a gap displayed in your histogram, then that mean that for the region that has the gap, there was no data to be collected or observed giving us that gap."
+        "U1-L6-Q02": "The sum of the frequencies will remain the same even through every other characteristic of the graph changes.",
+        "U1-L6-Q01": "I think B is correct because if you have a gap displayed in your histogram, then that mean that for the region that has the gap, there was no data to be collected or observed giving us that gap.",
+        "U1-L7-Q02": "It is D because the formula for getting the squared deviations of the scores is correct and it uses the mean score of 84 in the right place.",
+        "U1-L7-Q03": "If  you add all the numbers up and divide by total number of house, which is 8, you get B as your answer.",
+        "U1-L7-Q01": "Neither will change because the outlier, since its an outlier, will not be factored in the data set chart.",
+        "U1-L7-Q04": "The mean of 23.5mm with a deviation of 1.4, and the two standard deviation rule, means that 23.5mm minus doubled 1.4mm, gives us 23.5-2.8= 20.7. Meaning answer B is the closest.",
+        "U1-L7-Q05": "This answer tells us that the remaining 23% of the entries got a score that was higher than 68.",
+        "U1-L7-Q06": "This is true because the number you get from adding Q3 by 1.5 by the IQR, it would not the greater than 43.",
+        "U1-L8-Q01": "Based on the boxplot, 25 miles per gallon is the median of the data, but more of the data is at 35, making it the top 25%.",
+        "U1-L8-Q02": "100 divided by 5 different sections of the data gives us a total rough estimate that each section is 20%, this means that about 75% of people met the height requirement.",
+        "U1-L8-Q03": "This is true the median's value is skewed to the right and the mean is less than the median."
       },
       "timestamps": {
         "U1-L2-Q01": 1757699021157,
@@ -1983,8 +2247,17 @@
         "U1-L5-Q02": "2025-09-20T01:38:34.531Z",
         "U1-L5-Q03": "2025-09-20T01:43:37.024Z",
         "U1-L6-Q03": "2025-09-20T01:53:09.480Z",
-        "U1-L6-Q02": "2025-09-20T02:25:50.703Z",
-        "U1-L6-Q01": "2025-09-20T02:46:16.219Z"
+        "U1-L6-Q02": "2025-09-24T15:43:40.425Z",
+        "U1-L6-Q01": "2025-09-20T02:46:16.219Z",
+        "U1-L7-Q02": "2025-09-26T17:34:53.963Z",
+        "U1-L7-Q03": "2025-09-26T17:44:57.676Z",
+        "U1-L7-Q01": "2025-09-26T17:51:49.601Z",
+        "U1-L7-Q04": "2025-09-30T00:18:25.696Z",
+        "U1-L7-Q05": "2025-09-30T00:25:28.176Z",
+        "U1-L7-Q06": "2025-09-30T00:28:38.686Z",
+        "U1-L8-Q01": "2025-09-30T00:34:27.903Z",
+        "U1-L8-Q02": "2025-09-30T00:41:52.076Z",
+        "U1-L8-Q03": "2025-09-30T00:44:34.817Z"
       },
       "attempts": {
         "U1-L2-Q01": 1,
@@ -2003,8 +2276,17 @@
         "U1-L5-Q02": 1,
         "U1-L5-Q03": 1,
         "U1-L6-Q03": 2,
-        "U1-L6-Q02": 1,
-        "U1-L6-Q01": 1
+        "U1-L6-Q02": 2,
+        "U1-L6-Q01": 1,
+        "U1-L7-Q02": 1,
+        "U1-L7-Q03": 2,
+        "U1-L7-Q01": 3,
+        "U1-L7-Q04": 3,
+        "U1-L7-Q05": 2,
+        "U1-L7-Q06": 1,
+        "U1-L8-Q01": 2,
+        "U1-L8-Q02": 3,
+        "U1-L8-Q03": 1
       }
     },
     "Guava_Wolf": {
@@ -2513,6 +2795,18 @@
         "U1-L7-Q03": {
           "value": "B",
           "timestamp": "2025-09-26T17:39:10.091Z"
+        },
+        "U1-L8-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:01:31.661Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:04:25.716Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:06:26.553Z"
         }
       },
       "reasons": {
@@ -2529,7 +2823,10 @@
         "U1-L7-Q04": "2025-09-26T17:29:35.638Z",
         "U1-L7-Q06": "2025-09-26T17:35:22.896Z",
         "U1-L7-Q05": "2025-09-26T17:36:13.065Z",
-        "U1-L7-Q03": "2025-09-26T17:39:10.091Z"
+        "U1-L7-Q03": "2025-09-26T17:39:10.091Z",
+        "U1-L8-Q02": "2025-09-29T18:01:31.661Z",
+        "U1-L8-Q01": "2025-09-29T18:04:25.716Z",
+        "U1-L8-Q03": "2025-09-29T18:06:26.553Z"
       },
       "attempts": {
         "U1-L6-Q02": 1,
@@ -2540,7 +2837,10 @@
         "U1-L7-Q04": 1,
         "U1-L7-Q06": 1,
         "U1-L7-Q05": 1,
-        "U1-L7-Q03": 1
+        "U1-L7-Q03": 1,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q03": 1
       }
     },
     "Lemon_Monkey": {
@@ -2929,6 +3229,18 @@
         "U1-L7-Q06": {
           "value": "B",
           "timestamp": "2025-09-26T17:46:31.404Z"
+        },
+        "U1-L8-Q01": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:03:10.524Z"
+        },
+        "U1-L8-Q02": {
+          "value": "A",
+          "timestamp": "2025-09-29T18:03:51.177Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:04:29.350Z"
         }
       },
       "reasons": {
@@ -2975,7 +3287,10 @@
         "U1-L7-Q03": "2025-09-26T17:36:19.002Z",
         "U1-L7-Q04": "2025-09-26T17:39:50.990Z",
         "U1-L7-Q05": "2025-09-26T17:46:20.360Z",
-        "U1-L7-Q06": "2025-09-26T17:46:31.404Z"
+        "U1-L7-Q06": "2025-09-26T17:46:31.404Z",
+        "U1-L8-Q01": "2025-09-29T18:03:10.524Z",
+        "U1-L8-Q02": "2025-09-29T18:03:51.177Z",
+        "U1-L8-Q03": "2025-09-29T18:04:29.350Z"
       },
       "attempts": {
         "U1-L6-Q01": 1,
@@ -3001,7 +3316,10 @@
         "U1-L7-Q03": 1,
         "U1-L7-Q04": 1,
         "U1-L7-Q05": 1,
-        "U1-L7-Q06": 1
+        "U1-L7-Q06": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q03": 1
       }
     },
     "Plum_Iguana": {
@@ -3089,6 +3407,18 @@
         "U1-L7-Q04": {
           "value": "B",
           "timestamp": "2025-09-26T17:48:31.845Z"
+        },
+        "U1-L8-Q01": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:20:13.593Z"
+        },
+        "U1-L8-Q02": {
+          "value": "D",
+          "timestamp": "2025-09-29T18:20:39.114Z"
+        },
+        "U1-L8-Q03": {
+          "value": "A",
+          "timestamp": "2025-09-29T18:21:14.118Z"
         }
       },
       "reasons": {
@@ -3117,7 +3447,10 @@
         "U1-L7-Q01": "2025-09-26T17:42:37.909Z",
         "U1-L7-Q06": "2025-09-26T17:48:27.500Z",
         "U1-L7-Q05": "2025-09-26T17:48:30.219Z",
-        "U1-L7-Q04": "2025-09-26T17:48:31.845Z"
+        "U1-L7-Q04": "2025-09-26T17:48:31.845Z",
+        "U1-L8-Q01": "2025-09-29T18:20:13.593Z",
+        "U1-L8-Q02": "2025-09-29T18:20:39.114Z",
+        "U1-L8-Q03": "2025-09-29T18:21:14.119Z"
       },
       "attempts": {
         "U1-L3-Q01": 1,
@@ -3140,7 +3473,10 @@
         "U1-L7-Q01": 1,
         "U1-L7-Q06": 1,
         "U1-L7-Q05": 1,
-        "U1-L7-Q04": 1
+        "U1-L7-Q04": 1,
+        "U1-L8-Q01": 1,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q03": 1
       }
     },
     "Papaya_Goat": {
@@ -3343,6 +3679,37 @@
         "U1-L7-Q04": 1,
         "U1-L7-Q05": 1,
         "U1-L7-Q06": 1
+      }
+    },
+    "lemon-eagle": {
+      "answers": {
+        "U1-L8-Q01": {
+          "value": "A",
+          "timestamp": "2025-09-29T18:11:48.285Z"
+        },
+        "U1-L8-Q02": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:11:41.754Z"
+        },
+        "U1-L8-Q03": {
+          "value": "C",
+          "timestamp": "2025-09-29T18:14:56.234Z"
+        }
+      },
+      "reasons": {
+        "U1-L8-Q01": "50 - 35= 15",
+        "U1-L8-Q02": "From the median to the upper whisker, it is 50%",
+        "U1-L8-Q03": "when the data is skewed left, it pulls the mean to the left and when it goes to the left, it is most likely less."
+      },
+      "timestamps": {
+        "U1-L8-Q01": "2025-09-29T18:11:48.285Z",
+        "U1-L8-Q02": "2025-09-29T18:11:41.754Z",
+        "U1-L8-Q03": "2025-09-29T18:14:56.234Z"
+      },
+      "attempts": {
+        "U1-L8-Q01": 2,
+        "U1-L8-Q02": 1,
+        "U1-L8-Q03": 1
       }
     }
   }
