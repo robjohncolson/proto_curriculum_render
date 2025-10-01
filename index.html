@@ -156,6 +156,12 @@
         let syncCheckInterval = null;
         let lastPeerDataTimestamp = null;
 
+        // PHASE 2 OPTIMIZATION: Answer batching queue
+        let answerSyncQueue = [];
+        let syncTimer = null;
+        const BATCH_SIZE = 10;           // Flush after 10 answers
+        const BATCH_INTERVAL = 60000;    // Flush every 60 seconds
+
         // Initialize Supabase if credentials are provided
         if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL' &&
             typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
@@ -269,7 +275,71 @@
             }
         }
 
-        // Pull peer data from Supabase
+        // PHASE 2 OPTIMIZATION: Queue management for batching answers
+        function queueAnswerForSync(username, questionId, answerValue, timestamp) {
+            // Add to queue
+            answerSyncQueue.push({
+                username: username,
+                question_id: questionId,
+                answer_value: answerValue,
+                timestamp: timestamp
+            });
+
+            console.log(`📝 Queued answer for ${questionId} (queue size: ${answerSyncQueue.length})`);
+
+            // Flush immediately if batch size reached
+            if (answerSyncQueue.length >= BATCH_SIZE) {
+                console.log(`🚀 Batch size reached (${BATCH_SIZE}), flushing queue now`);
+                flushAnswerQueue();
+            } else if (!syncTimer) {
+                // Start timer if this is the first item
+                syncTimer = setTimeout(() => {
+                    console.log(`⏰ Batch interval reached (${BATCH_INTERVAL}ms), flushing queue`);
+                    flushAnswerQueue();
+                }, BATCH_INTERVAL);
+            }
+        }
+
+        function flushAnswerQueue() {
+            if (answerSyncQueue.length === 0) return;
+
+            // Take a copy and clear the queue
+            const batch = [...answerSyncQueue];
+            answerSyncQueue = [];
+
+            // Clear the timer
+            if (syncTimer) {
+                clearTimeout(syncTimer);
+                syncTimer = null;
+            }
+
+            // Send batch to Supabase
+            console.log(`🔄 Flushing ${batch.length} answers from queue...`);
+            batchPushAnswersToSupabase(batch)
+                .then(count => {
+                    if (count > 0) {
+                        console.log(`✅ Successfully flushed ${count} answers`);
+                        updatePeerDataTimestamp();
+                    }
+                })
+                .catch(error => {
+                    console.error(`❌ Error flushing queue:`, error);
+                    // Re-queue failed items
+                    answerSyncQueue.push(...batch);
+                });
+        }
+
+        // Final flush on page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (answerSyncQueue.length > 0) {
+                console.log(`🔄 Page unload: flushing ${answerSyncQueue.length} queued answers`);
+                flushAnswerQueue();
+                // Show message to user that we're saving
+                e.returnValue = 'Saving your answers...';
+            }
+        });
+
+        // Pull peer data from Supabase - OPTIMIZED for 40+ users
         async function pullPeerDataFromSupabase() {
             if (!turboModeActive || !supabase) return null;
 
@@ -277,39 +347,52 @@
                 const currentUser = localStorage.getItem('consensusUsername');
                 if (!currentUser) return null;
 
-                // Get all answers from all users
-                const { data, error } = await supabase
+                // OPTIMIZATION 1: Build query with server-side filtering
+                let query = supabase
                     .from('answers')
                     .select('*')
+                    .neq('username', currentUser) // Filter out own answers on server
                     .order('timestamp', { ascending: false });
 
+                // OPTIMIZATION 2: Incremental fetch - only get data newer than last sync
+                if (lastPeerDataTimestamp) {
+                    query = query.gt('timestamp', lastPeerDataTimestamp);
+                    console.log(`🔄 Incremental sync from timestamp: ${lastPeerDataTimestamp}`);
+                } else {
+                    console.log(`🔄 Initial full sync (no previous timestamp)`);
+                }
+
+                const { data, error } = await query;
+
                 if (error) throw error;
-                if (!data || data.length === 0) return null;
+
+                // OPTIMIZATION 3: Early return if no new data
+                if (!data || data.length === 0) {
+                    console.log('✅ No new peer data (already up to date)');
+                    return null;
+                }
 
                 // Convert to our local storage format
                 const peerData = {};
                 data.forEach(answer => {
-                    if (answer.username !== currentUser) {
-                        if (!peerData[answer.username]) {
-                            peerData[answer.username] = { answers: {} };
-                        }
-                        peerData[answer.username].answers[answer.question_id] = {
-                            value: answer.answer_value,
-                            timestamp: parseInt(answer.timestamp)
-                        };
+                    // No need to filter currentUser here - already done on server
+                    if (!peerData[answer.username]) {
+                        peerData[answer.username] = { answers: {} };
                     }
+                    peerData[answer.username].answers[answer.question_id] = {
+                        value: answer.answer_value,
+                        timestamp: parseInt(answer.timestamp)
+                    };
                 });
 
-                // Update last peer timestamp
-                const timestamps = data
-                    .filter(a => a.username !== currentUser)
-                    .map(a => parseInt(a.timestamp));
-
+                // Update last peer timestamp for next incremental fetch
+                const timestamps = data.map(a => parseInt(a.timestamp));
                 if (timestamps.length > 0) {
                     lastPeerDataTimestamp = Math.max(...timestamps);
+                    console.log(`✅ Updated last sync timestamp: ${lastPeerDataTimestamp}`);
                 }
 
-                console.log(`✅ Pulled peer data for ${Object.keys(peerData).length} users`);
+                console.log(`✅ Pulled ${data.length} NEW answers from ${Object.keys(peerData).length} users (incremental sync)`);
                 return peerData;
             } catch (error) {
                 console.log(`⚠️ Failed to pull peer data: ${error.message}`);
@@ -3313,20 +3396,24 @@ function renderAttachments(attachments, questionId) {
 
             // Sync to Supabase if turbo mode is active
             if (turboModeActive) {
-                // Use Railway if available, otherwise direct Supabase
-                const syncFunction = window.submitAnswerViaRailway || pushAnswerToSupabase;
-
-                syncFunction(currentUsername, questionId, value, timestampNow)
-                    .then(success => {
-                        if (success) {
-                            console.log(`✅ Answer synced to cloud for ${questionId}`);
-                            // Update peer data timestamp after successful sync
-                            updatePeerDataTimestamp();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(`⚠️ Failed to sync answer: ${error.message}`);
-                    });
+                // PHASE 2 OPTIMIZATION: Use batching queue instead of immediate sync
+                if (window.submitAnswerViaRailway) {
+                    // Railway has its own batching, use it directly
+                    window.submitAnswerViaRailway(currentUsername, questionId, value, timestampNow)
+                        .then(success => {
+                            if (success) {
+                                console.log(`✅ Answer synced via Railway for ${questionId}`);
+                                updatePeerDataTimestamp();
+                            }
+                        })
+                        .catch(error => {
+                            console.log(`⚠️ Failed to sync answer via Railway: ${error.message}`);
+                        });
+                } else {
+                    // Use batching queue for Supabase
+                    queueAnswerForSync(currentUsername, questionId, value, timestampNow);
+                    console.log(`✅ Answer queued for batch sync: ${questionId}`);
+                }
             }
 
             // Update UI
