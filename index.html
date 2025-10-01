@@ -28,7 +28,7 @@
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
     <button class="sync-button" onclick="showSyncModal()" title="Sync & Export Data">⚡</button>
     <button class="share-button" onclick="showShareModal()" title="Share this app">📤</button>
-    <button class="pigs-toggle" onclick="togglePigs()" title="Toggle multiplayer pigs">🐷</button>
+    <button class="pigs-toggle" onclick="showSpriteSettingsModal()" title="Multiplayer sprite settings">🎮</button>
 
     <!-- Global Sync Modal -->
     <div id="syncModal" class="modal" style="display: none;">
@@ -142,6 +142,55 @@
                 <small>💡 Teachers can export master databases for class-wide analysis</small>
                 <br>
                 <small>Version 2.0 | Created for AP Statistics Students</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- TASK 5.0: Sprite Settings Modal -->
+    <div id="spriteSettingsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSpriteSettingsModal()">&times;</span>
+            <h2>🎮 Multiplayer Sprite Settings</h2>
+
+            <div class="sprite-settings-container">
+                <!-- Enable/Disable Toggle -->
+                <div class="setting-row">
+                    <label for="spritesEnabled">Show Multiplayer Sprites:</label>
+                    <input type="checkbox" id="spritesEnabled" onchange="handleSpriteToggle()">
+                </div>
+
+                <!-- Color Selection -->
+                <div class="setting-row color-selection-row">
+                    <label>My Sprite Color:</label>
+                    <div class="color-grid" id="colorGrid">
+                        <!-- Colors will be dynamically generated -->
+                    </div>
+                </div>
+
+                <!-- Sprite Preview -->
+                <div class="sprite-preview-section">
+                    <h3>Preview:</h3>
+                    <div class="sprite-preview" id="spritePreview">
+                        <!-- Preview sprite will be rendered here -->
+                    </div>
+                    <p class="preview-username" id="previewUsername"></p>
+                </div>
+
+                <!-- Info Section -->
+                <div class="sprite-info">
+                    <p><strong>💡 How it works:</strong></p>
+                    <ul>
+                        <li>See classmates' sprites when they're active</li>
+                        <li>Sprites walk when viewing lessons</li>
+                        <li>Gold jump when submitting answers</li>
+                        <li>Fade after 5 minutes of inactivity</li>
+                    </ul>
+                </div>
+
+                <!-- Save Button -->
+                <button onclick="saveSpriteSettings()" class="save-sprite-settings-btn">
+                    ✅ Save Settings
+                </button>
             </div>
         </div>
     </div>
@@ -4850,9 +4899,11 @@ if (chartInstances[`dotplot-${questionId}`]) {
 
         // Simplified peer pig class for multiplayer visualization
         // TASK 4.2: Complete sprite-based PeerPig class replacement
+        // TASK 5.1: Unified color system - respects localStorage for current player
         class PeerPig {
-            constructor(username) {
+            constructor(username, isPlayer = false) {
                 this.username = username;
+                this.isPlayer = isPlayer || (username === currentUsername);
                 this.x = 0; // Will be set by position update
                 this.y = 20;
                 this.color = this.generateColorFromUsername(username);
@@ -4866,7 +4917,15 @@ if (chartInstances[`dotplot-${questionId}`]) {
             }
 
             generateColorFromUsername(username) {
-                // Generate consistent color from username hash
+                // TASK 5.1: Use saved color for current player, hash for peers
+                if (this.isPlayer || username === currentUsername) {
+                    const savedHue = localStorage.getItem('spriteColorHue');
+                    if (savedHue) {
+                        return `hsl(${savedHue}, 70%, 60%)`;
+                    }
+                }
+
+                // Generate consistent color from username hash for peers
                 let hash = 0;
                 for (let i = 0; i < username.length; i++) {
                     hash = username.charCodeAt(i) + ((hash << 5) - hash);
@@ -4876,7 +4935,15 @@ if (chartInstances[`dotplot-${questionId}`]) {
             }
 
             getHueRotation() {
-                // Calculate hue rotation for sprite filter
+                // TASK 5.1: Use saved hue for current player, hash for peers
+                if (this.isPlayer || this.username === currentUsername) {
+                    const savedHue = localStorage.getItem('spriteColorHue');
+                    if (savedHue) {
+                        return parseInt(savedHue);
+                    }
+                }
+
+                // Calculate hue rotation for sprite filter from hash
                 let hash = 0;
                 for (let i = 0; i < this.username.length; i++) {
                     hash = this.username.charCodeAt(i) + ((hash << 5) - hash);
@@ -4905,7 +4972,7 @@ if (chartInstances[`dotplot-${questionId}`]) {
                     width: 100%;
                     height: 100%;
                     background-image: url(${SPRITE_BASE64});
-                    background-size: 1200%;
+                    background-size: 400% 100%;
                     background-position: 0 0;
                     filter: hue-rotate(${this.getHueRotation()}deg);
                     image-rendering: pixelated;
@@ -4991,8 +5058,8 @@ if (chartInstances[`dotplot-${questionId}`]) {
                         this.walkInterval = null;
                         return;
                     }
-                    // Assuming walking frames are in sprite sheet
-                    const x = (frame % 4) * 8.33; // 1200% / 12 frames = ~8.33% per frame
+                    // TASK 5.1: Fixed for 4-frame sprite sheet
+                    const x = (frame % 4) * 33.33; // 4 frames = 33.33% per frame
                     this.spriteElement.style.backgroundPosition = `-${x}% 0`;
                     frame++;
                 }, 200);
@@ -5241,10 +5308,10 @@ if (chartInstances[`dotplot-${questionId}`]) {
             updatePigPositions() {
                 if (!this.enabled || this.pigs.size === 0) return;
 
-                // TASK 4.2: Even row spacing (not clustering)
+                // TASK 5.0: Fixed positioning - left side, higher up to avoid UI
                 const spacing = 40; // 40px between sprites
-                const startX = 100; // Starting X position
-                const baseY = 20;   // Base Y position (bottom of screen)
+                const startX = 50;  // Starting X position (left side)
+                const baseY = 80;   // Base Y position (higher up to clear bottom UI)
 
                 let index = 0;
                 this.pigs.forEach(pig => {
@@ -7279,6 +7346,180 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 // Fallback: try to find any modal with sync-related content
                 const allModals = document.querySelectorAll('.modal');
                 console.log('Available modals:', allModals);
+            }
+        }
+
+        // ========================================
+        // TASK 5.0: SPRITE SETTINGS MODAL FUNCTIONS
+        // ========================================
+
+        /**
+         * Show the sprite settings modal
+         */
+        function showSpriteSettingsModal() {
+            const modal = document.getElementById('spriteSettingsModal');
+            if (modal) {
+                // Load current settings
+                const spritesEnabled = localStorage.getItem('pigsEnabled') !== 'false';
+                const savedColor = localStorage.getItem('spriteColor') || '0';
+
+                document.getElementById('spritesEnabled').checked = spritesEnabled;
+
+                // Generate color grid
+                generateColorGrid();
+
+                // Set selected color
+                selectColor(parseInt(savedColor));
+
+                // Update preview
+                updateSpritePreview();
+
+                modal.style.display = 'block';
+            }
+        }
+
+        /**
+         * Close the sprite settings modal
+         */
+        function closeSpriteSettingsModal() {
+            const modal = document.getElementById('spriteSettingsModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        /**
+         * Generate the color grid with selectable colors
+         */
+        function generateColorGrid() {
+            const colorGrid = document.getElementById('colorGrid');
+            if (!colorGrid) return;
+
+            // Define color options (hue values)
+            const colors = [
+                { hue: 0, name: 'Red' },
+                { hue: 30, name: 'Orange' },
+                { hue: 60, name: 'Yellow' },
+                { hue: 120, name: 'Green' },
+                { hue: 180, name: 'Cyan' },
+                { hue: 210, name: 'Blue' },
+                { hue: 270, name: 'Purple' },
+                { hue: 330, name: 'Pink' }
+            ];
+
+            colorGrid.innerHTML = colors.map((color, index) => `
+                <div class="color-option" data-hue="${color.hue}" data-index="${index}"
+                     onclick="selectColor(${index})"
+                     style="background: hsl(${color.hue}, 70%, 50%);"
+                     title="${color.name}">
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Select a color option
+         */
+        function selectColor(index) {
+            // Remove previous selection
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selection to clicked color
+            const colorOptions = document.querySelectorAll('.color-option');
+            if (colorOptions[index]) {
+                colorOptions[index].classList.add('selected');
+
+                // Store selection temporarily
+                window.tempSpriteColorIndex = index;
+                window.tempSpriteColorHue = colorOptions[index].dataset.hue;
+
+                // Update preview
+                updateSpritePreview();
+            }
+        }
+
+        /**
+         * Update the sprite preview with current settings
+         */
+        function updateSpritePreview() {
+            const previewContainer = document.getElementById('spritePreview');
+            const usernameLabel = document.getElementById('previewUsername');
+
+            if (!previewContainer || !usernameLabel) return;
+
+            const hue = window.tempSpriteColorHue || localStorage.getItem('spriteColorHue') || '0';
+            const username = currentUsername || 'Preview';
+
+            previewContainer.innerHTML = `
+                <div class="preview-sprite" style="
+                    width: 60px;
+                    height: 60px;
+                    background-image: url(${SPRITE_BASE64});
+                    background-size: 1200%;
+                    background-position: 0 0;
+                    filter: hue-rotate(${hue}deg);
+                    image-rendering: pixelated;
+                    margin: 0 auto;
+                "></div>
+            `;
+
+            usernameLabel.textContent = username;
+        }
+
+        /**
+         * Handle sprite toggle checkbox change
+         */
+        function handleSpriteToggle() {
+            const checkbox = document.getElementById('spritesEnabled');
+            // Just update the UI, actual toggle happens on save
+            console.log('Sprite toggle:', checkbox.checked);
+        }
+
+        /**
+         * Save sprite settings and apply them
+         */
+        function saveSpriteSettings() {
+            const spritesEnabled = document.getElementById('spritesEnabled').checked;
+            const colorIndex = window.tempSpriteColorIndex !== undefined ?
+                              window.tempSpriteColorIndex :
+                              parseInt(localStorage.getItem('spriteColor') || '0');
+            const colorHue = window.tempSpriteColorHue ||
+                            localStorage.getItem('spriteColorHue') || '0';
+
+            // Save to localStorage
+            localStorage.setItem('pigsEnabled', spritesEnabled);
+            localStorage.setItem('spriteColor', colorIndex.toString());
+            localStorage.setItem('spriteColorHue', colorHue);
+
+            console.log('Sprite settings saved:', { spritesEnabled, colorIndex, colorHue });
+
+            // Apply settings
+            if (!window.pigManager && spritesEnabled) {
+                // Initialize pig manager if not exists
+                window.pigManager = new PigManager();
+            } else if (window.pigManager) {
+                // Toggle existing manager
+                if (window.pigManager.enabled !== spritesEnabled) {
+                    window.pigManager.toggle();
+                }
+            }
+
+            // Update user's own sprite color if they have one
+            // (This would apply to their PigSprite, not PeerPig)
+
+            // Close modal
+            closeSpriteSettingsModal();
+
+            // Show success message
+            showMessage('✅ Sprite settings saved!', 'success');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const spriteModal = document.getElementById('spriteSettingsModal');
+            if (event.target === spriteModal) {
+                closeSpriteSettingsModal();
             }
         }
 
