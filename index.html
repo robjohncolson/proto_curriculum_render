@@ -835,6 +835,9 @@
         // TASK 4.1: Track activity listeners for cleanup (memory leak prevention)
         let activityListeners = [];
 
+        // TASK 4.2: Sprite base64 image (extracted from PigSprite CSS)
+        const SPRITE_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA5gAAADECAYAAAD6bI6sAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAADmKADAAQAAAABAAAAxAAAAAD+OvF/AAAYa0lEQVR4Ae3d0XHcuLIA0PEtR6NctEHIIeyGsQ7BDsLORen4vVt1y1XTY7EHZIMEwbNfC4FsNA5aI6FIWJ9+vL39unX876/v3z91DJ+G3nt+e4+XAhRfMPv8irmGCzf7+s0+v+EKqjih2ddv9vkVl8Nw4WZfv9nnN1xBFSc0+/rtPb+9xysuhzRc7/n9J83ABQQIECBAgAABAgQIECBA4AkBG8wnkFxCgAABAgQIECBAgAABArmADWZu5AoCBAgQIECAAAECBAgQeELgc7zm9eUlfqmp/fP9ven6vS/ee357jzebZ+93xK92RjjWh/qMIvft7PNMfd57tbay7z/1uSyqPo/9NyTUp/pcEjj654P6XFqd2y37/Ix384wi9+3o6QnmvY8WAQIECBAgQIAAAQIECKwUsMFcCec2AgQIECBAgAABAgQIELgXsMG899AiQIAAAQIECBAgQIAAgZUCD2cwV8b58Lbe76B/OPCkHVf39A78cmHHd+CXr67vVZ/OsC9Vlfpc0unf5/Nz2Vh9Lvv07lWfy8Lqc9nnbL2z/77kCebZKlK+BAgQIECAAAECBAgQGFTABnPQhZEWAQIECBAgQIAAAQIEziZgg3m2FZMvAQIECBAgQIAAAQIEBhUoP4O59R36QZ0OS4tnX/rZ34Hvq3e7qc++wupzm6/63OaX3a0+M6HlfvW57LO1V31uE1Sf2/zi3Vfz9AQzVoA2AQIECBAgQIAAAQIECKwSsMFcxeYmAgQIECBAgAABAgQIEIgCNphRRJsAAQIECBAgQIAAAQIEVgmUn8FclYWbCOwkcLV34HdiNUyRgPosghSmi4D67MIqaJGA+iyCFIZAgYAnmAWIQhAgQIAAAQIECBAgQIDA7WaDqQoIECBAgAABAgQIECBAoETABrOEURACBAgQIECAAAECBAgQsMFUAwQIECBAgAABAgQIECBQImCDWcIoCAECBAgQIECAAAECBAjYYKoBAgQIECBAgAABAgQIECgRsMEsYRSEAAECBAgQIECAAAECBGww1QABAgQIECBAgAABAgQIlAjYYJYwCkKAAAECBAgQIECAAAECNphqgAABAgQIECBAgAABAgRKBGwwSxgFIUCAAAECBAgQIECAAAEbTDVAgAABAgQIECBAgAABAiUCNpgljIIQIECAAAECBAgQIECAgA2mGiBAgAABAgQIECBAgACBEgEbzBJGQQgQIECAAAECBAgQIEDABlMNECBAgAABAgQIECBAgECJgA1mCaMgBAgQIECAAAECBAgQIGCDqQYIECBAgAABAgQIECBAoETABrOEURACBAgQIECAAAECBAgQ+FxN8OmffzaF/PXvv5vuz27emt+Pt7dsiE39Mb/okfVvGvwPN2fjZf1/COlLEwnE9W+dWqzv1vuz67fm1/v7Pctf/zaBreuvPrf5u3tZQH0u++g9VkB9Hut/9tE9wTz7CsqfAAECBAgQIECAAAECgwjYYA6yENIgQIAAAQIECBAgQIDA2QVsMM++gvInQIAAAQIECBAgQIDAIALlZzAHmddp04hnfuI78LG/90TjeEfns3W+Mf/WeNGj9f7s+q35OTOYCY/dv3X91efY63v27NTn2Vdw7vzV59zra3bnEvAE81zrJVsCBAgQIECAAAECBAgMK2CDOezSSIwAAQIECBAgQIAAAQLnErDBPNd6yZYAAQIECBAgQIAAAQLDCjiDOdjSxDME8UxV1l89nWy8rL86H/EIECBAgAABAgQInEkg/r7cmnvcD7Sen12/Nb/4b4B4gpmJ6ydAgAABAgQIECBAgACBpwRsMJ9ichEBAgQIECBAgAABAgQIZAI2mJmQfgIECBAgQIAAAQIECBB4SsAZzKeY9rsoe8c666/ONBsv66/ORzwCBAgQIECAAAECBMYV8ARz3LWRGQECBAgQIECAAAECBE4lYIN5quWSLAECBAgQIECAAAECBMYVsMEcd21kRoAAAQIECBAgQIAAgVMJlJ/BHP1M3tb8fr6/n2qBJUugp8DW76eeuf439tb8fL/3XqG+8beuf9/s1Gdv39Hjq8/RV+ja+anP2vW/mqcnmLX1IxoBAgQIECBAgAABAgQuK2CDedmlN3ECBAgQIECAAAECBAjUCthg1nqKRoAAAQIECBAgQIAAgcsKlJ/BvKykiZ9C4GrvwJ9iUST5W0B9/qbwPwMKqM8BF0VKvwXU528K/0PgcAFPMA9fAgkQIECAAAECBAgQIEBgDgEbzDnW0SwIECBAgAABAgQIECBwuIAN5uFLIAECBAgQIECAAAECBAjMIfBwBrP33357fXnZVa73fLLJ9B7/ap6Zt/42gbPXZ+/82zRdXS3Qe333/vy8/f33ItHPL18W+3WOJdC7PuNsd6/XmEBsJ/V8U89RbNe2+lz+vG2tz96ee39/956PJ5i7frsbjAABAgQIECBAgAABAvMK2GDOu7ZmRoAAAQIECBAgQIAAgV0FbDB35TYYAQIECBAgQIAAAQIE5hX4/Nf37596Tu/H29uvnvFbY/eeb+/4V/OM69v7nfHe78D3zj96xfbs9dl7ftEztnuvr/qM4m3t0T4/s+yr67l3fcb59K7XOF7a3nhmsHo9snzPVq/ZfLJ+9bntzKD6zCqsrb+352jf39Xz9QSzrd5cTYAAAQIECBAgQIAAAQIfCNhgfgDjywQIECBAgAABAgQIECDQJmCD2eblagIECBAgQIAAAQIECBD4QODh72B+cJ0vEzhEoPqd8DiJ2d+Bj/PVrhVQn7WeW6ON9v38cKZs578L2Ls+43qN5h/z014WeKjX5ctvrX9HMIZTn1FEe0lg7/pcykVfLuAJZm7kCgIECBAgQIAAAQIECBB4QsAG8wkklxAgQIAAAQIECBAgQIBALmCDmRu5ggABAgQIECBAgAABAgSeENj/DGb2d6i+fn0i7YVLYvydz7wsZPZUV/MZljjfOEqrZxYveGb57n3GIk5/tPbrt293Kf0MnnedGgR6C4Tv99cw3tnrM36/hendbq2fjw8Bar/g87LN05msNq/Wq9Vjq9j99erz3mPv1unqN/w8fvDa+vMqxu/8+6cnmA8r6AsECBAgQIAAAQIECBAgsEbABnONmnsIECBAgAABAgQIECBA4EHABvOBxBcIECBAgAABAgQIECBAYI3A/mcw12R54XteX16Gmn2WT/OZg6Fm9//JxHfUY35b34GP8a7e5n31Cph6/tN/Xg62eqc7czWYn3T6CqjPbb4+T7f57X23J5h7ixuPAAECBAgQIECAAAECkwrYYE66sKZFgAABAgQIECBAgACBvQVsMPcWNx4BAgQIECBAgAABAgQmFdj/DGbnM2xn/7ttzXVW7Vkdr3lCfW/I/m5n39Fvt8vVZ29Q8bcJhO/305+hDhrZ91t2pieE0wwCR3+ehnQ0CQwtEL9fRj+TGfMdGneG5MLP4+opZT8Pq8fzBLNaVDwCBAgQIECAAAECBAhcVMAG86ILb9oECBAgQIAAAQIECBCoFrDBrBYVjwABAgQIECBAgAABAhcV2P8MZgKdnQFqPTMz+jvuCcct88ju178s8FBP4R34Vv+HeMvD385en8n00vp9Dd4xXqt/vP9q7VavWK+x3RpvNO84n5jf2ecX53N0u9o7i3f0fPceP6vXzCu7f+/5jD5eq1f0j+3WeKP5xPnE/M4+vzif0dqZb7Y+cT69f//0BDOKaxMgQIAAAQIECBAgQIDAKgEbzFVsbiJAgAABAgQIECBAgACBKGCDGUW0CRAgQIAAAQIECBAgQGCVwHBnMFfNYqKber8TPRHVIVOJ6+PvRN0vQ/S5773dtnpl8eN4V29Hr63+s3tGr9nne/T8orf6vF+R6HPf6/M0evRux/VQr8vi0Wv5ar2zCXiCOduKmg8BAgQIECBAgAABAgQOErDBPAjesAQIECBAgAABAgQIEJhNwAZzthU1HwIECBAgQIAAAQIECBwksPsZzOzvuGQOW+/P4uu/lkB1PVXHm301eLWtcLVXdby22fS/evb59RdsG6Hauzpe22zOdzWvtjWr9qqO1zab/lfPPr/+gssjbPXdev9ydu29nmC2m7mDAAECBAgQIECAAAECBP4gYIP5BxRfIkCAAAECBAgQIECAAIF2ARvMdjN3ECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBpwQ+/Xh7+/XUlSsv+uv7908rby25be/57T1eCVJDkNnn10BxyktnX7/Z53fKomtIevb1m31+DUt9yktnX7/Z53fKomtIevb123t+e4/XsNQll/aen39FtmSZBCFAgAABAgQIECBAgAABG0w1QIAAAQIECBAgQIAAAQIlAjaYJYyCECBAgAABAgQIECBAgMDnSPD68hK/1NT++f7edP3eF+89v73Hm82z9zviVzsjHOtDfUaR+3b2eaY+771aW9n3n/pcFlWfx/4bEupTfS4JHP3zQX0urc7tln1+xrt5RpH7dvT0BPPeR4sAAQIECBAgQIAAAQIEVgrYYK6EcxsBAgQIECBAgAABAgQI3AvYYN57aBEgQIAAAQIECBAgQIDASoGHM5gr43x4W+930D8ceNKOq3t6B365sOM78MtX1/eqT2fYl6pKfS7p9O/z+blsrD6XfXr3qs9lYfW57HO23tl/X/IE82wVKV8CBAgQIECAAAECBAgMKmCDOejCSIsAAQIECBAgQIAAAQJnE7DBPNuKyZcAAQIECBAgQIAAAQKDCpSfwdz6Dv2gToelxbMv/ezvwPfVu93UZ19h9bnNV31u88vuVp+Z0HK/+lz22dqrPrcJqs9tfvHuq3l6ghkrQJsAAQIECBAgQIAAAQIEVgnYYK5icxMBAgQIECBAgAABAgQIRAEbzCiiTYAAAQIECBAgQIAAAQKrBMrPYK7Kwk0EdhK42jvwO7EapkhAfRZBCtNFQH12YRW0SEB9FkEKQ6BAwBPMAkQhCBAgQIAAAQIECBAgQOB2s8FUBQQIECBAgAABAgQIECBQImCDWcIoCAECBAgQIECAAAECBAjYYKoBAgQIECBAgAABAgQIECgRsMEsYRSEAAECBAgQIECAAAECBGww1QABAgQIECBAgAABAgQIlAjYYJYwCkKAAAECBAgQIECAAAECNphqgAABAgQIECBAgAABAgRKBGwwSxgFIUCAAAECBAgQIECAAAEbTDVAgAABAgQIECBAgAABAiUCNpgljIIQIECAAAECBAgQIECAgA2mGiBAgAABAgQIECBAgACBEgEbzBJGQQgQIECAAAECBAgQIEDABlMNECBAgAABAgQIECBAgECJgA1mCaMgBAgQIECAAAECBAgQIGCDqQYIECBAgAABAgQIECBAoETABrOEURACBAgQIECAAAECBAgQsMFUAwQIECBAgAABAgQIECBQImCDWcIoCAECBAgQIECAAAECBAh8jgSf/vknfqmp/evff5uub7149Pxa5xOvj/OLnll/jLe1nY2X9W8d3/19BeL6tY4W67P1/uz60fPL8te/TWD09R89v2367s4ERl//0fPLfPVvExh9/UfPb5u+uz3BVAMECBAgQIAAAQIECBAgUCJgg1nCKAgBAgQIECBAgAABAgQI2GCqAQIECBAgQIAAAQIECBAoEXg4g1kSVZDVAvFMW3xHPfavHujJG+N4R+cTx39yGr8vi/P53VH0P6PnVzRNYT4QGH39R8/vA1ZfLhIYff1Hz69oGYT5QGD09R89vw9YfZnAIQKeYB7CblACBAgQIECAAAECBAjMJ2CDOd+amhEBAgQIECBAgAABAgQOEbDBPITdoAQIECBAgAABAgQIEJhPwBnMwdY0vuMfzwxm/dXTycbL+qvzEY8AAQIECBAgQIDAngLx993WsePv8633Z9ePlp8nmNmK6SdAgAABAgQIECBAgACBpwRsMJ9ichEBAgQIECBAgAABAgQIZAI2mJmQfgIECBAgQIAAAQIECBB4SsAZzKeY9rsoe0c766/ONBsv66/ORzwCBAgQIECAAAECBMYV8ARz3LWRGQECBAgQIECAAAECBE4lYIN5quWSLAECBAgQIECAAAECBMYVsMEcd21kRoAAAQIECBAgQIAAgVMJPJzBHP1M3ej5nWr1JXt5gdG/n0bP7/IF1Blg9PUfPb/Oy3P58KOv/+j5Xb6AOgOMvv6j5xeXZ/R8R8vPE8xYQdoECBAgQIAAAQIECBAgsErABnMVm5sIECBAgAABAgQIECBAIArYYEYRbQIECBAgQIAAAQIECBBYJfBwBnNVFDcR2ElgtHfM47RHzy/mq10rMPr6j55f7WqIFgVGX//R84ue2rUCo6//6PnVroZoBLYJeIK5zc/dBAgQIECAAAECBAgQIPA/ARtMpUCAAAECBAgQIECAAAECJQI2mCWMghAgQIAAAQIECBAgQIDAwxnMn+/vpSqvLy+l8bJg1fln42X9vfO5um/mr39Z4Oz12Tv/ZT29vQVa1/f127fllL5+Xe4v7m3Nv3h44XoL/P338gg719tyMrebesyEJutXn6ULWv39M/vv755glpafYAQIECBAgAABAgQIELiugA3mddfezAkQIECAAAECBAgQIFAqYINZyikYAQIECBAgQIAAAQIErivw+a/v3z9VTv/H29uvynhbY1XPL8un93hX961+Bz6uZ+934nvnH+cT27PXZ+/5Rc/Y7r2+6vNefLTPw/vsHltH12f1+KP9vKqeXyxWTzCjiDYBAgQIECBAgAABAgQIrBKwwVzF5iYCBAgQIECAAAECBAgQiAI2mFFEmwABAgQIECBAgAABAgRWCTz8HcxVUdxEoJNA9TviV3sHvtOyCPs/AfU5Vin8/PKlKaHeZ1pjMtnnT3U9xfHP3h7Np7XeMv+96zHLR3+bgPps83L13AKeYM69vmZHgAABAgQIECBAgACB3QRsMHejNhABAgQIECBAgAABAgTmFrDBnHt9zY4AAQIECBAgQIAAAQK7CfQ/gxn/rtHXr9smF+PFaI1ncOLtR7ezMzoP+WUerd5ZvOCb5TvamYTo9/rt2/2XWr3u79YiUCrwUJ8x+sXrNX6+ZJ9Hka93O1u/6jN82Xyqx7vamcFYb5l31j9avWb59u5Xn9uEW+tT/W3z3nx3/H1768/zGC8mGH5/j93VbU8wq0XFI0CAAAECBAgQIECAwEUFbDAvuvCmTYAAAQIECBAgQIAAgWoBG8xqUfEIECBAgAABAgQIECBwUYH+ZzAvCls17dHOuGT5/Hx/r5r6OeMM9g788IiZ19YzCcMDSLCnQPZ51XPsEWK3nsnKcnZmKxPS3yKgPlu0+l979c/L/sLXGsETzGutt9kSIECAAAECBAgQIECgm4ANZjdagQkQIECAAAECBAgQIHAtARvMa6232RIgQIAAAQIECBAgQKCbQPczmPHvGm1+x9uZrPtiqPaojnef7XCt8vpsnGE801R9JqUxHZcPJnB0fQ7Gcbp04vqdbgKDJuzzcrAFOTidWA8Hp2P4YoFsfc/++1L8+TDb/sgTzOJvCOEIECBAgAABAgQIECBwVQEbzKuuvHkTIECAAAECBAgQIECgWMAGsxhUOAIECBAgQIAAAQIECFxVoPwMZnwnOnuHOsJnf0dx8zvKccDB25nH4OkPl17v+rx9+XI351ivsT37+mbze03O/Gb332FP2Ij1EqfY6pPFi/HP3m71qZ5v5n10ftXzjfFa5xe9Yrs1Xsxn9HY2v+gR55PdH6+frV3tk8Wbze/o+sm8j85v63r3/v0z89uaf+v9nmC2irmeAAECBAgQIECAAAECBP4oYIP5RxZfJECAAAECBAgQIECAAIFWARvMVjHXEyBAgAABAgQIECBAgMAfBcrPYP5xFF98WiC+o/30jS48RCCuV+uZ40OS7jho9IhDbfXJ4sfxrtaOPlu9z+YX5793/lfzbvWN63N1r+gRPbf6ZPHjeFdrR5+t3mfzi/PfO/+ree/te/R4nmAevQLGJ0CAAAECBAgQIECAwCQCNpiTLKRpECBAgAABAgQIECBA4GgBG8yjV8D4BAgQIECAAAECBAgQmERg9zOYW/+Ozdb7J1k30+gkUF1f1fE6TfuwsHyW6at9quMtZ693du/q+VXHm60C+SyvaLVPdbzl7PVe3Xvr/LfeX12BnmBWi4pHgAABAgQIECBAgACBiwrYYF504U2bAAECBAgQIECAAAEC1QI2mNWi4hEgQIAAAQIECBAgQOCiAv8HukM8fBoMw90AAAAASUVORK5CYII=';
+
 
         // Share Modal Functions
         function showShareModal() {
@@ -4846,17 +4849,20 @@ if (chartInstances[`dotplot-${questionId}`]) {
         // ========================================
 
         // Simplified peer pig class for multiplayer visualization
+        // TASK 4.2: Complete sprite-based PeerPig class replacement
         class PeerPig {
             constructor(username) {
                 this.username = username;
-                this.x = Math.random() * (window.innerWidth - 60);
-                this.y = 20; // Position from bottom
+                this.x = 0; // Will be set by position update
+                this.y = 20;
                 this.color = this.generateColorFromUsername(username);
                 this.activityState = 'idle';
                 this.currentQuestion = null;
                 this.lastActivity = Date.now();
+                this.fadeTimeout = null;
+                this.walkInterval = null;
                 this.element = this.createElement();
-                this.setupInteractions();
+                this.setupFading();
             }
 
             generateColorFromUsername(username) {
@@ -4869,31 +4875,67 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 return `hsl(${hue}, 70%, 60%)`;
             }
 
-            createElement() {
-                const pig = document.createElement('div');
-                pig.className = 'peer-pig-sprite';
-                pig.id = `peer-pig-${this.username}`;
-                pig.innerHTML = `
-                    <div class="peer-pig-body" style="background: ${this.color}">
-                        <div class="peer-pig-emoji">🐷</div>
-                    </div>
-                    <div class="peer-pig-username">${this.username}</div>
-                `;
-                pig.style.left = this.x + 'px';
-                pig.style.bottom = this.y + 'px';
-                return pig;
+            getHueRotation() {
+                // Calculate hue rotation for sprite filter
+                let hash = 0;
+                for (let i = 0; i < this.username.length; i++) {
+                    hash = this.username.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return Math.abs(hash) % 360;
             }
 
-            setupInteractions() {
-                // Show tooltip on hover
-                this.element.addEventListener('mouseenter', () => {
-                    this.showQuestionTooltip();
-                });
+            createElement() {
+                const container = document.createElement('div');
+                container.className = 'peer-sprite-container';
+                container.style.cssText = `
+                    position: absolute;
+                    width: 30px;
+                    height: 30px;
+                    bottom: ${this.y}px;
+                    left: ${this.x}px;
+                    opacity: 0.7;
+                    transition: all 0.3s ease;
+                    z-index: 50;
+                `;
 
-                // Click to celebrate
-                this.element.addEventListener('click', () => {
-                    this.celebrate();
-                });
+                // Sprite element
+                const sprite = document.createElement('div');
+                sprite.className = 'peer-sprite';
+                sprite.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    background-image: url(${SPRITE_BASE64});
+                    background-size: 1200%;
+                    background-position: 0 0;
+                    filter: hue-rotate(${this.getHueRotation()}deg);
+                    image-rendering: pixelated;
+                `;
+
+                // Username label
+                const label = document.createElement('div');
+                label.className = 'peer-username-label';
+                label.textContent = this.username;
+                label.style.cssText = `
+                    position: absolute;
+                    bottom: 35px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.7);
+                    color: white;
+                    padding: 2px 5px;
+                    border-radius: 3px;
+                    font-size: 10px;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    font-family: monospace;
+                `;
+
+                container.appendChild(sprite);
+                container.appendChild(label);
+
+                this.spriteElement = sprite;
+                this.labelElement = label;
+                return container;
             }
 
             setActivity(state, questionId = null) {
@@ -4901,94 +4943,122 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 this.currentQuestion = questionId;
                 this.lastActivity = Date.now();
                 this.updateVisualState();
+                this.resetFading();
             }
 
             updateVisualState() {
-                const pig = this.element;
+                // Clear existing intervals
+                if (this.walkInterval) {
+                    clearInterval(this.walkInterval);
+                    this.walkInterval = null;
+                }
 
                 // Remove all state classes
-                pig.className = 'peer-pig-sprite';
+                this.element.classList.remove('walking', 'jumping', 'idle', 'thinking');
 
-                // Add new state class
                 switch(this.activityState) {
-                    case 'answering':
-                        pig.classList.add('pig-answering');
-                        this.showThinkingBubble();
-                        break;
-                    case 'submitted':
-                        pig.classList.add('pig-submitted');
-                        this.celebrate();
-                        setTimeout(() => {
-                            this.setActivity('idle');
-                        }, 3000);
-                        break;
                     case 'viewing':
-                        pig.classList.add('pig-viewing');
+                        // Walking animation when viewing lessons
+                        this.element.classList.add('walking');
+                        this.animateWalking();
                         break;
-                    case 'idle':
+
+                    case 'answering':
+                        // Subtle thinking animation
+                        this.element.classList.add('thinking');
+                        this.setIdleFrame();
+                        break;
+
+                    case 'submitted':
+                        // Jump and turn gold briefly
+                        this.jumpAndCelebrate();
+                        break;
+
                     default:
-                        // Fade if inactive > 5 minutes
-                        if (Date.now() - this.lastActivity > 300000) {
-                            pig.classList.add('pig-inactive');
-                        }
+                        // Idle state
+                        this.element.classList.add('idle');
+                        this.setIdleFrame();
                         break;
                 }
             }
 
-            showThinkingBubble() {
-                // Remove any existing bubbles
-                const existing = this.element.querySelector('.pig-thought-bubble');
-                if (existing) existing.remove();
-
-                const bubble = document.createElement('div');
-                bubble.className = 'pig-thought-bubble';
-                bubble.innerHTML = '💭';
-                this.element.appendChild(bubble);
-
-                setTimeout(() => bubble.remove(), 3000);
+            animateWalking() {
+                // Cycle through walking frames
+                let frame = 0;
+                this.walkInterval = setInterval(() => {
+                    if (this.activityState !== 'viewing') {
+                        clearInterval(this.walkInterval);
+                        this.walkInterval = null;
+                        return;
+                    }
+                    // Assuming walking frames are in sprite sheet
+                    const x = (frame % 4) * 8.33; // 1200% / 12 frames = ~8.33% per frame
+                    this.spriteElement.style.backgroundPosition = `-${x}% 0`;
+                    frame++;
+                }, 200);
             }
 
-            showQuestionTooltip() {
-                if (!this.currentQuestion && this.activityState === 'idle') return;
+            jumpAndCelebrate() {
+                // Save original filter
+                const originalFilter = this.spriteElement.style.filter;
 
-                // Remove any existing tooltip
-                const existing = this.element.querySelector('.pig-tooltip');
-                if (existing) return; // Already showing
+                // Turn gold
+                this.spriteElement.style.filter = 'hue-rotate(45deg) brightness(1.5) saturate(2)';
 
-                const tooltip = document.createElement('div');
-                tooltip.className = 'pig-tooltip';
+                // Jump animation
+                this.element.style.transition = 'all 0.3s ease';
+                this.element.style.transform = 'translateY(-20px)';
 
-                let content = '';
-                if (this.activityState === 'idle') {
-                    content = 'Idle';
-                } else if (this.activityState === 'answering') {
-                    content = `Answering: ${this.getQuestionLabel(this.currentQuestion)}`;
-                } else if (this.activityState === 'viewing') {
-                    content = `Viewing: ${this.getQuestionLabel(this.currentQuestion)}`;
-                } else if (this.activityState === 'submitted') {
-                    content = `Just submitted: ${this.getQuestionLabel(this.currentQuestion)}`;
-                }
+                setTimeout(() => {
+                    this.element.style.transform = 'translateY(0)';
 
-                tooltip.innerHTML = `<div class="pig-tooltip-content">${content}</div>`;
-                this.element.appendChild(tooltip);
+                    // Revert to original color after landing
+                    setTimeout(() => {
+                        this.spriteElement.style.filter = originalFilter;
+                    }, 500);
+                }, 300);
 
-                // Remove on mouse leave
-                const removeTooltip = () => {
-                    tooltip.remove();
-                };
-
-                this.element.addEventListener('mouseleave', removeTooltip, { once: true });
+                // Auto-transition to idle after 3 seconds
+                setTimeout(() => {
+                    if (this.activityState === 'submitted') {
+                        this.setActivity('idle', null);
+                    }
+                }, 3000);
             }
 
-            getQuestionLabel(questionId) {
-                if (!questionId) return 'Unknown';
+            setIdleFrame() {
+                // Set to idle frame (first frame of sprite sheet)
+                this.spriteElement.style.backgroundPosition = '0 0';
+            }
 
-                // Extract unit and question from ID (e.g., "U1-L2-Q03")
-                const match = questionId.match(/U(\d+)-L(\d+)-Q(\d+)/);
-                if (match) {
-                    return `Unit ${match[1]}, Lesson ${match[2]}, Q${match[3]}`;
-                }
-                return questionId;
+            setupFading() {
+                // Start checking for inactivity
+                this.resetFading();
+            }
+
+            resetFading() {
+                if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+
+                // Reset opacity
+                this.element.style.opacity = '0.7';
+
+                // Set timeout for fading (5 minutes)
+                this.fadeTimeout = setTimeout(() => {
+                    this.startFading();
+                }, 300000); // 5 minutes
+            }
+
+            startFading() {
+                // Gradually fade out
+                this.element.style.transition = 'opacity 2s ease';
+                this.element.style.opacity = '0.2';
+
+                // Remove completely after fade
+                setTimeout(() => {
+                    if (Date.now() - this.lastActivity > 300000) {
+                        this.remove();
+                    }
+                }, 2000);
             }
 
             updatePosition(x, y, animate = true) {
@@ -5001,15 +5071,11 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 this.element.style.bottom = y + 'px';
             }
 
-            celebrate() {
-                this.element.classList.add('celebrating');
-                setTimeout(() => {
-                    this.element.classList.remove('celebrating');
-                }, 1000);
-            }
-
             remove() {
-                this.element.classList.add('peer-pig-exit');
+                if (this.walkInterval) clearInterval(this.walkInterval);
+                if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+                this.element.style.transition = 'opacity 0.5s ease';
+                this.element.style.opacity = '0';
                 setTimeout(() => {
                     this.element.remove();
                 }, 500);
@@ -5024,6 +5090,8 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 this.enabled = localStorage.getItem('pigsEnabled') !== 'false';
                 // TASK 4.1: Debounce map to prevent duplicate pig creation
                 this.pigCreationDebounce = new Map();
+                // TASK 4.2: Periodic cleanup interval
+                this.cleanupInterval = null;
                 if (this.enabled) {
                     this.init();
                 }
@@ -5038,15 +5106,76 @@ if (chartInstances[`dotplot-${questionId}`]) {
 
                 // Load existing peer pigs from classData
                 this.loadExistingPeers();
+
+                // TASK 4.2: Start periodic cleanup for inactive sprites
+                this.startPeriodicCleanup();
+            }
+
+            // TASK 4.2: Periodic cleanup - check every 60 seconds for inactive sprites
+            startPeriodicCleanup() {
+                if (this.cleanupInterval) {
+                    clearInterval(this.cleanupInterval);
+                }
+
+                this.cleanupInterval = setInterval(() => {
+                    this.cleanupInactiveSprites();
+                }, 60000); // Check every 60 seconds
+
+                console.log('🧹 Started periodic sprite cleanup (60s interval)');
+            }
+
+            cleanupInactiveSprites() {
+                if (!this.enabled || this.pigs.size === 0) return;
+
+                const fiveMinutesAgo = Date.now() - 300000;
+                const spritesToRemove = [];
+
+                // Check each sprite for inactivity
+                this.pigs.forEach((pig, username) => {
+                    if (pig.lastActivity < fiveMinutesAgo) {
+                        spritesToRemove.push(username);
+                    }
+                });
+
+                // Remove inactive sprites
+                if (spritesToRemove.length > 0) {
+                    console.log(`🧹 Cleaning up ${spritesToRemove.length} inactive sprite(s)`);
+                    spritesToRemove.forEach(username => {
+                        this.removePig(username);
+                    });
+                }
+            }
+
+            stopPeriodicCleanup() {
+                if (this.cleanupInterval) {
+                    clearInterval(this.cleanupInterval);
+                    this.cleanupInterval = null;
+                    console.log('🧹 Stopped periodic sprite cleanup');
+                }
             }
 
             loadExistingPeers() {
                 if (!classData || !classData.users) return;
 
+                // TASK 4.2: CRITICAL BUG FIX - Only load users active in last 5 minutes
+                const fiveMinutesAgo = Date.now() - 300000;
+
                 for (let username in classData.users) {
-                    if (username !== currentUsername) {
-                        // Create pig at random position
+                    if (username === currentUsername) continue;
+
+                    // Only load if active in last 5 minutes
+                    const lastUpdate = classData.users[username]?.currentActivity?.lastUpdate;
+                    if (lastUpdate && lastUpdate > fiveMinutesAgo) {
                         this.addPeerPig(username);
+
+                        // Set their current activity state
+                        const activity = classData.users[username].currentActivity;
+                        if (activity) {
+                            // Activity will be set after debounce in addPeerPig
+                            // Store it temporarily for application after creation
+                            if (!this.pendingActivities) this.pendingActivities = new Map();
+                            this.pendingActivities.set(username, activity);
+                        }
                     }
                 }
             }
@@ -5112,26 +5241,16 @@ if (chartInstances[`dotplot-${questionId}`]) {
             updatePigPositions() {
                 if (!this.enabled || this.pigs.size === 0) return;
 
-                // Group pigs by current question
-                const groups = new Map();
+                // TASK 4.2: Even row spacing (not clustering)
+                const spacing = 40; // 40px between sprites
+                const startX = 100; // Starting X position
+                const baseY = 20;   // Base Y position (bottom of screen)
 
+                let index = 0;
                 this.pigs.forEach(pig => {
-                    const key = pig.currentQuestion || 'idle';
-                    if (!groups.has(key)) {
-                        groups.set(key, []);
-                    }
-                    groups.get(key).push(pig);
-                });
-
-                // Position pigs in groups
-                let xOffset = 20;
-                groups.forEach((pigs, questionId) => {
-                    pigs.forEach((pig, index) => {
-                        const x = xOffset + (index * 60);
-                        const y = questionId === 'idle' ? 20 : 40; // Raise pigs that are working
-                        pig.updatePosition(x, y, true);
-                    });
-                    xOffset += (pigs.length * 60) + 40; // Space between groups
+                    const x = startX + (index * spacing);
+                    pig.updatePosition(x, baseY, true);
+                    index++;
                 });
             }
 
@@ -5152,6 +5271,8 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 if (this.enabled) {
                     this.init();
                 } else {
+                    // TASK 4.2: Stop cleanup when disabled
+                    this.stopPeriodicCleanup();
                     if (this.container) {
                         this.container.remove();
                         this.container = null;
@@ -5164,6 +5285,8 @@ if (chartInstances[`dotplot-${questionId}`]) {
             }
 
             destroy() {
+                // TASK 4.2: Stop cleanup when destroyed
+                this.stopPeriodicCleanup();
                 if (this.container) {
                     this.container.remove();
                 }
