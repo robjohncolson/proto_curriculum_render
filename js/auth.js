@@ -311,6 +311,11 @@ window.acceptUsername = function(name) {
     showUsernameWelcome();
     initializeFromEmbeddedData();
     updateCurrentUsernameDisplay();
+
+    // Initialize multiplayer pig system
+    if (typeof PigManager !== 'undefined' && !window.pigManager) {
+        window.pigManager = new PigManager();
+    }
 }
 
 /**

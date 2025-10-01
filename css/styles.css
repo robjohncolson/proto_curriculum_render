@@ -622,6 +622,43 @@ body.dark-theme .sync-button:hover {
     color: #2d2d2d;
 }
 
+/* Pigs toggle button */
+.pigs-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 210px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #e91e63;
+    background: white;
+    color: #e91e63;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.pigs-toggle:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+}
+
+body.dark-theme .pigs-toggle {
+    background: #2d2d2d;
+    color: #ff69b4;
+    border-color: #ff69b4;
+}
+
+body.dark-theme .pigs-toggle:hover {
+    background: #ff69b4;
+    color: #2d2d2d;
+}
+
 /* User button */
 .user-button {
     position: fixed;
@@ -725,6 +762,247 @@ animation: jump 0.5s ease-out;
 @keyframes jump {
 0%, 100% { transform: translateY(0); }
 50% { transform: translateY(-50px); }
+}
+
+/* ========================================
+   MULTIPLAYER PIG SYSTEM STYLES
+   ======================================== */
+
+/* Container for all peer pigs */
+.peer-pig-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    pointer-events: none;
+    z-index: 99;
+}
+
+/* Individual peer pig sprite */
+.peer-pig-sprite {
+    position: absolute;
+    width: 50px;
+    height: 70px;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease, left 0.3s ease, bottom 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.peer-pig-body {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: peer-pig-bounce 2s ease-in-out infinite;
+    position: relative;
+}
+
+.peer-pig-emoji {
+    font-size: 24px;
+    animation: peer-pig-wiggle 3s ease-in-out infinite;
+}
+
+.peer-pig-username {
+    position: absolute;
+    bottom: -18px;
+    font-size: 9px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-weight: 500;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Animations */
+@keyframes peer-pig-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes peer-pig-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+/* Entrance animation */
+.peer-pig-enter {
+    animation: peer-pig-enter 0.5s ease-out;
+}
+
+@keyframes peer-pig-enter {
+    from {
+        opacity: 0;
+        transform: scale(0) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Exit animation */
+.peer-pig-exit {
+    animation: peer-pig-exit 0.5s ease-in forwards;
+}
+
+@keyframes peer-pig-exit {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0) translateY(20px);
+    }
+}
+
+/* Celebration animation */
+.peer-pig-sprite.celebrating .peer-pig-emoji {
+    animation: peer-pig-celebrate 0.5s ease-in-out;
+}
+
+@keyframes peer-pig-celebrate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(360deg) scale(1.3); }
+    100% { transform: rotate(720deg) scale(1); }
+}
+
+/* Hover effect */
+.peer-pig-sprite:hover {
+    transform: scale(1.1);
+    z-index: 100;
+}
+
+.peer-pig-sprite:hover .peer-pig-body {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Activity states */
+.pig-answering .peer-pig-body {
+    animation: pig-thinking 1s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+    border: 2px solid #ffc107;
+}
+
+@keyframes pig-thinking {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.pig-submitted .peer-pig-body {
+    animation: pig-success 0.5s ease-out;
+    filter: brightness(1.3);
+}
+
+@keyframes pig-success {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.pig-viewing .peer-pig-body {
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.4);
+    border: 2px solid #2196f3;
+}
+
+.pig-inactive {
+    opacity: 0.4;
+    filter: grayscale(50%);
+}
+
+/* Thought bubble */
+.pig-thought-bubble {
+    position: absolute;
+    top: -30px;
+    right: -10px;
+    font-size: 24px;
+    animation: bubble-float 3s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes bubble-float {
+    0% { opacity: 0; transform: translateY(10px); }
+    50% { opacity: 1; transform: translateY(-5px); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Question tooltip */
+.pig-tooltip {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+    animation: tooltip-appear 0.2s ease-out;
+}
+
+@keyframes tooltip-appear {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.pig-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-style: solid;
+    border-width: 8px 8px 0 8px;
+    border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+.pig-tooltip-content {
+    font-weight: 500;
+}
+
+/* Dark mode support */
+body.dark-mode .peer-pig-username {
+    background: rgba(255,255,255,0.15);
+    color: #ecf0f1;
+}
+
+body.dark-mode .pig-tooltip {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .pig-tooltip::after {
+    border-color: rgba(255, 255, 255, 0.1) transparent transparent transparent;
+}
+
+body.dark-mode .pig-answering .peer-pig-body {
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
+}
+
+body.dark-mode .pig-viewing .peer-pig-body {
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.6);
 }
 
 .curriculum-overview {

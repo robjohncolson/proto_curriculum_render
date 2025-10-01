@@ -28,6 +28,7 @@
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
     <button class="sync-button" onclick="showSyncModal()" title="Sync & Export Data">⚡</button>
     <button class="share-button" onclick="showShareModal()" title="Share this app">📤</button>
+    <button class="pigs-toggle" onclick="togglePigs()" title="Toggle multiplayer pigs">🐷</button>
 
     <!-- Global Sync Modal -->
     <div id="syncModal" class="modal" style="display: none;">
@@ -2811,6 +2812,11 @@ function renderLessonSelector(unitInfo) {
                             reason: reason
                         });
                     }
+
+                    // Add peer pig if not already present
+                    if (window.pigManager && username !== currentUsername) {
+                        window.pigManager.addPeerPig(username);
+                    }
                 }
             }
 
@@ -3475,10 +3481,22 @@ function renderAttachments(attachments, questionId) {
                 }
             }
 
+            // Broadcast pig activity
+            if (window.pigManager) {
+                // Trigger celebration for current user's pig (if it exists)
+                if (window.pigSprite) {
+                    window.pigSprite.jump();
+                }
+
+                // Broadcast activity to peer pigs system
+                // This will be picked up when peers sync data
+                console.log(`🐷 Activity: ${currentUsername} submitted answer to ${questionId}`);
+            }
+
             // Update UI
             const submitBtn = document.getElementById(`submit-${questionId}`);
             const qContainer = document.querySelector(`[data-question-id="${questionId}"]`);
-            
+
             // Update button
             if (submitBtn) {
                 if (!canRetry(questionId)) {
@@ -4605,6 +4623,24 @@ if (chartInstances[`dotplot-${questionId}`]) {
             applyTheme(newTheme);
         }
 
+        // Toggle multiplayer pigs
+        window.togglePigs = function() {
+            if (!window.pigManager) {
+                // Initialize if not exists
+                window.pigManager = new PigManager();
+                showMessage('Multiplayer pigs enabled! 🐷', 'success');
+            } else {
+                const enabled = window.pigManager.toggle();
+                showMessage(enabled ? 'Multiplayer pigs enabled! 🐷' : 'Multiplayer pigs disabled', 'info');
+            }
+
+            // Update button appearance
+            const button = document.querySelector('.pigs-toggle');
+            if (button) {
+                button.style.opacity = window.pigManager?.enabled ? '1' : '0.5';
+            }
+        }
+
         // Initialize on load
         window.onload = function() {
             initTheme();
@@ -4654,7 +4690,326 @@ if (chartInstances[`dotplot-${questionId}`]) {
             }
         }
 
-        // Pig Sprite Controller
+        // ========================================
+        // MULTIPLAYER PIG SYSTEM
+        // ========================================
+
+        // Simplified peer pig class for multiplayer visualization
+        class PeerPig {
+            constructor(username) {
+                this.username = username;
+                this.x = Math.random() * (window.innerWidth - 60);
+                this.y = 20; // Position from bottom
+                this.color = this.generateColorFromUsername(username);
+                this.activityState = 'idle';
+                this.currentQuestion = null;
+                this.lastActivity = Date.now();
+                this.element = this.createElement();
+                this.setupInteractions();
+            }
+
+            generateColorFromUsername(username) {
+                // Generate consistent color from username hash
+                let hash = 0;
+                for (let i = 0; i < username.length; i++) {
+                    hash = username.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const hue = Math.abs(hash) % 360;
+                return `hsl(${hue}, 70%, 60%)`;
+            }
+
+            createElement() {
+                const pig = document.createElement('div');
+                pig.className = 'peer-pig-sprite';
+                pig.id = `peer-pig-${this.username}`;
+                pig.innerHTML = `
+                    <div class="peer-pig-body" style="background: ${this.color}">
+                        <div class="peer-pig-emoji">🐷</div>
+                    </div>
+                    <div class="peer-pig-username">${this.username}</div>
+                `;
+                pig.style.left = this.x + 'px';
+                pig.style.bottom = this.y + 'px';
+                return pig;
+            }
+
+            setupInteractions() {
+                // Show tooltip on hover
+                this.element.addEventListener('mouseenter', () => {
+                    this.showQuestionTooltip();
+                });
+
+                // Click to celebrate
+                this.element.addEventListener('click', () => {
+                    this.celebrate();
+                });
+            }
+
+            setActivity(state, questionId = null) {
+                this.activityState = state;
+                this.currentQuestion = questionId;
+                this.lastActivity = Date.now();
+                this.updateVisualState();
+            }
+
+            updateVisualState() {
+                const pig = this.element;
+
+                // Remove all state classes
+                pig.className = 'peer-pig-sprite';
+
+                // Add new state class
+                switch(this.activityState) {
+                    case 'answering':
+                        pig.classList.add('pig-answering');
+                        this.showThinkingBubble();
+                        break;
+                    case 'submitted':
+                        pig.classList.add('pig-submitted');
+                        this.celebrate();
+                        setTimeout(() => {
+                            this.setActivity('idle');
+                        }, 3000);
+                        break;
+                    case 'viewing':
+                        pig.classList.add('pig-viewing');
+                        break;
+                    case 'idle':
+                    default:
+                        // Fade if inactive > 5 minutes
+                        if (Date.now() - this.lastActivity > 300000) {
+                            pig.classList.add('pig-inactive');
+                        }
+                        break;
+                }
+            }
+
+            showThinkingBubble() {
+                // Remove any existing bubbles
+                const existing = this.element.querySelector('.pig-thought-bubble');
+                if (existing) existing.remove();
+
+                const bubble = document.createElement('div');
+                bubble.className = 'pig-thought-bubble';
+                bubble.innerHTML = '💭';
+                this.element.appendChild(bubble);
+
+                setTimeout(() => bubble.remove(), 3000);
+            }
+
+            showQuestionTooltip() {
+                if (!this.currentQuestion && this.activityState === 'idle') return;
+
+                // Remove any existing tooltip
+                const existing = this.element.querySelector('.pig-tooltip');
+                if (existing) return; // Already showing
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'pig-tooltip';
+
+                let content = '';
+                if (this.activityState === 'idle') {
+                    content = 'Idle';
+                } else if (this.activityState === 'answering') {
+                    content = `Answering: ${this.getQuestionLabel(this.currentQuestion)}`;
+                } else if (this.activityState === 'viewing') {
+                    content = `Viewing: ${this.getQuestionLabel(this.currentQuestion)}`;
+                } else if (this.activityState === 'submitted') {
+                    content = `Just submitted: ${this.getQuestionLabel(this.currentQuestion)}`;
+                }
+
+                tooltip.innerHTML = `<div class="pig-tooltip-content">${content}</div>`;
+                this.element.appendChild(tooltip);
+
+                // Remove on mouse leave
+                const removeTooltip = () => {
+                    tooltip.remove();
+                };
+
+                this.element.addEventListener('mouseleave', removeTooltip, { once: true });
+            }
+
+            getQuestionLabel(questionId) {
+                if (!questionId) return 'Unknown';
+
+                // Extract unit and question from ID (e.g., "U1-L2-Q03")
+                const match = questionId.match(/U(\d+)-L(\d+)-Q(\d+)/);
+                if (match) {
+                    return `Unit ${match[1]}, Lesson ${match[2]}, Q${match[3]}`;
+                }
+                return questionId;
+            }
+
+            updatePosition(x, y, animate = true) {
+                this.x = x;
+                this.y = y;
+                if (animate) {
+                    this.element.style.transition = 'all 0.3s ease';
+                }
+                this.element.style.left = x + 'px';
+                this.element.style.bottom = y + 'px';
+            }
+
+            celebrate() {
+                this.element.classList.add('celebrating');
+                setTimeout(() => {
+                    this.element.classList.remove('celebrating');
+                }, 1000);
+            }
+
+            remove() {
+                this.element.classList.add('peer-pig-exit');
+                setTimeout(() => {
+                    this.element.remove();
+                }, 500);
+            }
+        }
+
+        // Pig Manager - Manages all peer pigs in the classroom
+        class PigManager {
+            constructor() {
+                this.pigs = new Map();
+                this.container = null;
+                this.enabled = localStorage.getItem('pigsEnabled') !== 'false';
+                if (this.enabled) {
+                    this.init();
+                }
+            }
+
+            init() {
+                // Create container for all peer pigs
+                this.container = document.createElement('div');
+                this.container.id = 'peer-pig-container';
+                this.container.className = 'peer-pig-container';
+                document.body.appendChild(this.container);
+
+                // Load existing peer pigs from classData
+                this.loadExistingPeers();
+            }
+
+            loadExistingPeers() {
+                if (!classData || !classData.users) return;
+
+                for (let username in classData.users) {
+                    if (username !== currentUsername) {
+                        // Create pig at random position
+                        this.addPeerPig(username);
+                    }
+                }
+            }
+
+            addPeerPig(username, position = null) {
+                if (!this.enabled || !this.container) return;
+                if (this.pigs.has(username)) return;
+                if (username === currentUsername) return; // Don't create pig for current user
+
+                const pig = new PeerPig(username);
+                if (position) {
+                    pig.updatePosition(position.x, position.y, false);
+                }
+
+                this.pigs.set(username, pig);
+                this.container.appendChild(pig.element);
+
+                // Entrance animation
+                pig.element.classList.add('peer-pig-enter');
+                setTimeout(() => pig.element.classList.remove('peer-pig-enter'), 500);
+
+                console.log(`🐷 Added peer pig for ${username}`);
+            }
+
+            removePig(username) {
+                if (!this.enabled) return;
+                const pig = this.pigs.get(username);
+                if (pig) {
+                    pig.remove();
+                    this.pigs.delete(username);
+                    console.log(`🐷 Removed peer pig for ${username}`);
+                }
+            }
+
+            updatePeerPosition(username, x, y) {
+                if (!this.enabled) return;
+                const pig = this.pigs.get(username);
+                if (pig) {
+                    pig.updatePosition(x, y);
+                }
+            }
+
+            celebratePeer(username) {
+                if (!this.enabled) return;
+                const pig = this.pigs.get(username);
+                if (pig) {
+                    pig.celebrate();
+                }
+            }
+
+            updatePigPositions() {
+                if (!this.enabled || this.pigs.size === 0) return;
+
+                // Group pigs by current question
+                const groups = new Map();
+
+                this.pigs.forEach(pig => {
+                    const key = pig.currentQuestion || 'idle';
+                    if (!groups.has(key)) {
+                        groups.set(key, []);
+                    }
+                    groups.get(key).push(pig);
+                });
+
+                // Position pigs in groups
+                let xOffset = 20;
+                groups.forEach((pigs, questionId) => {
+                    pigs.forEach((pig, index) => {
+                        const x = xOffset + (index * 60);
+                        const y = questionId === 'idle' ? 20 : 40; // Raise pigs that are working
+                        pig.updatePosition(x, y, true);
+                    });
+                    xOffset += (pigs.length * 60) + 40; // Space between groups
+                });
+            }
+
+            updateActivity(username, state, questionId = null) {
+                if (!this.enabled) return;
+                const pig = this.pigs.get(username);
+                if (pig) {
+                    pig.setActivity(state, questionId);
+                    // Update positions to regroup
+                    this.updatePigPositions();
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                localStorage.setItem('pigsEnabled', this.enabled);
+
+                if (this.enabled) {
+                    this.init();
+                } else {
+                    if (this.container) {
+                        this.container.remove();
+                        this.container = null;
+                    }
+                    this.pigs.clear();
+                }
+
+                console.log(`🐷 Peer pigs ${this.enabled ? 'enabled' : 'disabled'}`);
+                return this.enabled;
+            }
+
+            destroy() {
+                if (this.container) {
+                    this.container.remove();
+                }
+                this.pigs.clear();
+            }
+        }
+
+        // Initialize global pig manager
+        window.pigManager = null;
+
+        // Pig Sprite Controller (Local player's pig)
         class PigSprite {
             constructor(color = 'pink') {
                 this.x = window.innerWidth / 2;
