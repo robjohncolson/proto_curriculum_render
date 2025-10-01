@@ -21,7 +21,13 @@ function initClassData() {
             answers: {},
             reasons: {},
             timestamps: {},
-            attempts: {}
+            attempts: {},
+            // TASK 3.3: Real-time activity tracking for pig system
+            currentActivity: {
+                state: 'idle',        // idle, viewing, answering, submitted
+                questionId: null,     // Current question being viewed/answered
+                lastUpdate: Date.now() // Timestamp of last activity change
+            }
         };
     }
 

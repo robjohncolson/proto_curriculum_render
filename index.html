@@ -187,6 +187,7 @@
             if (!supabase) {
                 turboModeActive = false;
                 console.log('No Supabase client available');
+                stopActivityRefresh(); // TASK 3.3: Stop activity refresh
                 return false;
             }
 
@@ -214,10 +215,18 @@
 
                 turboModeActive = true;
                 console.log('✅ Turbo mode active - Supabase connected');
+
+                // TASK 3.3: Start activity refresh when turbo mode is active
+                startActivityRefresh();
+
                 return true;
             } catch (error) {
                 turboModeActive = false;
                 console.log('🔌 Turbo mode inactive - Using offline mode:', error.message);
+
+                // TASK 3.3: Stop activity refresh when turbo mode fails
+                stopActivityRefresh();
+
                 return false;
             }
         }
@@ -641,6 +650,9 @@
                     // TODO: Trigger re-render of current question's peer data if needed
                     // This would need to be integrated with your existing quiz rendering logic
                 }
+
+                // TASK 3.3: Pull peer activity data for pig system
+                await pullPeerActivityFromSupabase();
             }
         }
 
@@ -2468,7 +2480,66 @@ function renderLessonSelector(unitInfo) {
                 
                 // Render charts for visible questions
                 setTimeout(renderVisibleCharts, 100);
+
+                // TASK 3.3: Set up activity tracking for question interactions
+                setTimeout(setupQuestionActivityTracking, 150);
             }, 100);
+        }
+
+        /**
+         * TASK 3.3: Sets up event listeners for tracking user activity on questions
+         * Tracks when users start interacting with inputs (viewing/answering state)
+         */
+        function setupQuestionActivityTracking() {
+            if (!currentQuestions || currentQuestions.length === 0) return;
+
+            currentQuestions.forEach(question => {
+                const questionId = question.id;
+
+                // Track radio button clicks (MC questions)
+                const radios = document.querySelectorAll(`input[name="choice-${questionId}"]`);
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        updateUserActivity('answering', questionId);
+                    });
+                });
+
+                // Track textarea focus (FRQ questions) - debounced
+                const frqTextarea = document.getElementById(`frq-${questionId}`);
+                if (frqTextarea) {
+                    let focusTimeout = null;
+                    frqTextarea.addEventListener('focus', () => {
+                        if (focusTimeout) clearTimeout(focusTimeout);
+                        focusTimeout = setTimeout(() => {
+                            updateUserActivity('answering', questionId);
+                        }, 1000); // Wait 1 second before marking as "answering"
+                    });
+
+                    // Clear timeout if they immediately blur
+                    frqTextarea.addEventListener('blur', () => {
+                        if (focusTimeout) clearTimeout(focusTimeout);
+                    });
+                }
+
+                // Track reasoning textarea focus - debounced
+                const reasonTextarea = document.getElementById(`reason-${questionId}`);
+                if (reasonTextarea) {
+                    let focusTimeout = null;
+                    reasonTextarea.addEventListener('focus', () => {
+                        if (focusTimeout) clearTimeout(focusTimeout);
+                        focusTimeout = setTimeout(() => {
+                            updateUserActivity('answering', questionId);
+                        }, 1000); // Wait 1 second before marking as "answering"
+                    });
+
+                    // Clear timeout if they immediately blur
+                    reasonTextarea.addEventListener('blur', () => {
+                        if (focusTimeout) clearTimeout(focusTimeout);
+                    });
+                }
+            });
+
+            console.log(`🐷 Activity tracking set up for ${currentQuestions.length} questions`);
         }
 
         // Render question
@@ -3492,6 +3563,9 @@ function renderAttachments(attachments, questionId) {
                 // This will be picked up when peers sync data
                 console.log(`🐷 Activity: ${currentUsername} submitted answer to ${questionId}`);
             }
+
+            // TASK 3.3: Track activity state for real-time sync
+            updateUserActivity('submitted', questionId);
 
             // Update UI
             const submitBtn = document.getElementById(`submit-${questionId}`);
@@ -5008,6 +5082,220 @@ if (chartInstances[`dotplot-${questionId}`]) {
 
         // Initialize global pig manager
         window.pigManager = null;
+
+        // ========================================
+        // TASK 3.3: Activity Tracking Functions
+        // ========================================
+
+        /**
+         * Updates user's current activity state and syncs to cloud
+         * @param {string} state - Activity state: 'idle', 'viewing', 'answering', 'submitted'
+         * @param {string|null} questionId - Current question ID or null for idle
+         */
+        function updateUserActivity(state, questionId = null) {
+            if (!currentUsername) return;
+
+            // Update local classData
+            if (!classData.users[currentUsername]) {
+                console.warn('User data not initialized for activity tracking');
+                return;
+            }
+
+            const previousState = classData.users[currentUsername].currentActivity?.state;
+            const previousQuestion = classData.users[currentUsername].currentActivity?.questionId;
+
+            // Update activity state
+            classData.users[currentUsername].currentActivity = {
+                state: state,
+                questionId: questionId,
+                lastUpdate: Date.now()
+            };
+
+            // Save to localStorage
+            saveClassData();
+
+            // Log activity change
+            console.log(`🐷 Activity: ${currentUsername} ${state} ${questionId || ''}`);
+
+            // Update local pig sprite if exists
+            if (window.pigManager) {
+                const localPig = window.pigManager.pigs.get(currentUsername);
+                if (localPig) {
+                    localPig.setActivity(state, questionId);
+                }
+            }
+
+            // Queue for cloud sync if turbo mode active
+            if (turboModeActive && typeof queueActivityForSync === 'function') {
+                queueActivityForSync(currentUsername, state, questionId);
+            }
+
+            // Auto-transition: submitted → idle after 3 seconds
+            if (state === 'submitted') {
+                setTimeout(() => {
+                    // Only transition if still in submitted state
+                    if (classData.users[currentUsername]?.currentActivity?.state === 'submitted') {
+                        updateUserActivity('idle', null);
+                    }
+                }, 3000);
+            }
+        }
+
+        /**
+         * Queues activity update for batch syncing to cloud
+         * @param {string} username - Username
+         * @param {string} state - Activity state
+         * @param {string|null} questionId - Question ID
+         */
+        function queueActivityForSync(username, state, questionId) {
+            if (!turboModeActive || !supabase) return;
+
+            // Activity updates are sent immediately (not batched) for real-time feel
+            // But we use a debounced approach to prevent spam
+            if (window.activitySyncDebounce) {
+                clearTimeout(window.activitySyncDebounce);
+            }
+
+            window.activitySyncDebounce = setTimeout(() => {
+                pushActivityToSupabase(username, state, questionId);
+            }, 500); // 500ms debounce
+        }
+
+        /**
+         * Pushes activity update to Supabase
+         * @param {string} username - Username
+         * @param {string} state - Activity state
+         * @param {string|null} questionId - Question ID
+         */
+        async function pushActivityToSupabase(username, state, questionId) {
+            if (!turboModeActive || !supabase) return;
+
+            try {
+                const activityData = {
+                    username: username,
+                    activity_state: state,
+                    question_id: questionId,
+                    timestamp: Date.now()
+                };
+
+                const { error } = await supabase
+                    .from('user_activity')
+                    .upsert(activityData, { onConflict: 'username' });
+
+                if (error) throw error;
+                console.log(`✅ Activity synced: ${username} ${state}`);
+            } catch (error) {
+                console.error('❌ Error syncing activity:', error);
+            }
+        }
+
+        /**
+         * Pulls peer activity data from Supabase and updates pig states
+         */
+        async function pullPeerActivityFromSupabase() {
+            if (!turboModeActive || !supabase) return;
+
+            try {
+                const currentUser = localStorage.getItem('consensusUsername');
+                if (!currentUser) return;
+
+                const { data, error } = await supabase
+                    .from('user_activity')
+                    .select('*')
+                    .neq('username', currentUser)
+                    .gt('timestamp', Date.now() - 300000); // Only last 5 minutes
+
+                if (error) throw error;
+                if (!data || data.length === 0) return;
+
+                // Process activity updates
+                data.forEach(activity => {
+                    const username = activity.username;
+                    const state = activity.activity_state;
+                    const questionId = activity.question_id;
+
+                    // Update classData with peer activity
+                    if (classData.users[username]) {
+                        classData.users[username].currentActivity = {
+                            state: state,
+                            questionId: questionId,
+                            lastUpdate: activity.timestamp
+                        };
+                    } else {
+                        // Create minimal user entry for new peer
+                        classData.users[username] = {
+                            answers: {},
+                            reasons: {},
+                            timestamps: {},
+                            attempts: {},
+                            currentActivity: {
+                                state: state,
+                                questionId: questionId,
+                                lastUpdate: activity.timestamp
+                            }
+                        };
+                    }
+
+                    // Update pig visual state
+                    if (window.pigManager) {
+                        const pig = window.pigManager.pigs.get(username);
+                        if (pig) {
+                            pig.setActivity(state, questionId);
+                        } else {
+                            // Create pig for new peer
+                            window.pigManager.addPeerPig(username);
+                            const newPig = window.pigManager.pigs.get(username);
+                            if (newPig) {
+                                newPig.setActivity(state, questionId);
+                            }
+                        }
+                    }
+                });
+
+                console.log(`✅ Pulled activity for ${data.length} peers`);
+
+                // Update pig positions based on activity grouping
+                if (window.pigManager) {
+                    window.pigManager.updatePigPositions();
+                }
+
+            } catch (error) {
+                console.error('❌ Error pulling peer activity:', error);
+            }
+        }
+
+        /**
+         * Starts periodic activity refresh (every 30 seconds)
+         */
+        function startActivityRefresh() {
+            if (!turboModeActive) return;
+
+            // Clear existing interval if any
+            if (window.activityRefreshInterval) {
+                clearInterval(window.activityRefreshInterval);
+            }
+
+            // Pull immediately
+            pullPeerActivityFromSupabase();
+
+            // Set up periodic refresh
+            window.activityRefreshInterval = setInterval(() => {
+                pullPeerActivityFromSupabase();
+            }, 30000); // Every 30 seconds
+
+            console.log('🐷 Activity refresh started (30s interval)');
+        }
+
+        /**
+         * Stops periodic activity refresh
+         */
+        function stopActivityRefresh() {
+            if (window.activityRefreshInterval) {
+                clearInterval(window.activityRefreshInterval);
+                window.activityRefreshInterval = null;
+                console.log('🐷 Activity refresh stopped');
+            }
+        }
 
         // Pig Sprite Controller (Local player's pig)
         class PigSprite {
