@@ -2305,6 +2305,7 @@ body.dark-mode .import-step select {
     margin-bottom: 10px;
     border-left: 4px solid #3498db;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .peer-response-card:hover {
@@ -2409,6 +2410,158 @@ body.dark-mode .import-step select {
 
 .vote-btn.contradicts:hover {
     background: #f5c6cb;
+}
+
+/* Enhanced voting styles for FRQ */
+.vote-btn {
+    min-width: 100px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    position: relative;
+}
+
+.vote-btn i {
+    font-size: 16px;
+}
+
+.vote-btn .vote-count {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.vote-btn .vote-percentage {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-left: 2px;
+}
+
+.vote-btn.voted {
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+.vote-btn.helpful.voted {
+    background: #10b981;
+    color: white;
+    border-color: #059669;
+}
+
+.vote-btn.unclear.voted {
+    background: #f59e0b;
+    color: white;
+    border-color: #d97706;
+}
+
+.vote-btn.contradicts.voted {
+    background: #ef4444;
+    color: white;
+    border-color: #dc2626;
+}
+
+/* Your vote badge */
+.your-vote-badge {
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    display: inline-block;
+    animation: badge-appear 0.3s ease-out;
+}
+
+.your-vote-badge.unclear {
+    background: #f59e0b;
+}
+
+.your-vote-badge.contradicts {
+    background: #ef4444;
+}
+
+@keyframes badge-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Vote bar container */
+.vote-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.vote-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Answer rank badge */
+.answer-rank {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: 700;
+    animation: rank-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rank-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Consensus highlighting */
+.peer-response-card[data-consensus="high"] {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.peer-response-card[data-consensus="medium"] {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 2px solid #3b82f6;
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.2);
+}
+
+.peer-response-card[data-consensus="low"] {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 2px solid #10b981;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+/* Peer voting buttons container */
+.peer-voting-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
 }
 
 /* Add explanation to retry button */
@@ -2751,6 +2904,77 @@ body.dark-mode .peer-response-card.correct .peer-reasoning-text {
     background: #1a252f;
     border-color: #f39c12;
     color: #f39c12;
+}
+
+/* Dark mode for enhanced voting */
+body.dark-mode .vote-bar-container {
+    background: #1a252f;
+}
+
+body.dark-mode .vote-bar {
+    background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+}
+
+body.dark-mode .peer-response-card[data-consensus="high"] {
+    background: linear-gradient(135deg, #422006 0%, #57270a 100%);
+    border-color: #f59e0b;
+}
+
+body.dark-mode .peer-response-card[data-consensus="medium"] {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+    border-color: #3b82f6;
+}
+
+body.dark-mode .peer-response-card[data-consensus="low"] {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+    border-color: #10b981;
+}
+
+body.dark-mode .vote-btn {
+    background: #2c3e50;
+    border-color: #34495e;
+    color: #ecf0f1;
+}
+
+body.dark-mode .vote-btn:hover {
+    background: #34495e;
+}
+
+body.dark-mode .vote-btn.helpful {
+    background: #064e3b;
+    border-color: #059669;
+    color: #6ee7b7;
+}
+
+body.dark-mode .vote-btn.helpful.voted {
+    background: #059669;
+    color: white;
+}
+
+body.dark-mode .vote-btn.unclear {
+    background: #422006;
+    border-color: #d97706;
+    color: #fbbf24;
+}
+
+body.dark-mode .vote-btn.unclear.voted {
+    background: #d97706;
+    color: white;
+}
+
+body.dark-mode .vote-btn.contradicts {
+    background: #450a0a;
+    border-color: #dc2626;
+    color: #fca5a5;
+}
+
+body.dark-mode .vote-btn.contradicts.voted {
+    background: #dc2626;
+    color: white;
+}
+
+body.dark-mode .peer-voting-buttons {
+    border-top-color: #34495e;
 }
 
 /* Golden styling for correct answer question headers */

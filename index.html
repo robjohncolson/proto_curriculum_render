@@ -2665,14 +2665,28 @@ function renderLessonSelector(unitInfo) {
                 return;
             }
 
-            // Sort responses - those with reasoning first
+            // Calculate vote scores for each response (only "helpful" votes count for ranking)
+            peerResponses.forEach(peer => {
+                peer.helpfulVotes = getVoteCount(questionId, peer.username, 'helpful');
+                peer.unclearVotes = getVoteCount(questionId, peer.username, 'unclear');
+                peer.contradictsVotes = getVoteCount(questionId, peer.username, 'contradicts');
+                peer.totalVotes = peer.helpfulVotes + peer.unclearVotes + peer.contradictsVotes;
+                peer.voteScore = peer.helpfulVotes; // Use helpful votes for ranking
+            });
+
+            // Sort responses by helpful votes (highest first), then by reasoning
             peerResponses.sort((a, b) => {
+                if (b.voteScore !== a.voteScore) return b.voteScore - a.voteScore;
                 const aHasReason = a.reason && a.reason.trim().length > 0;
                 const bHasReason = b.reason && b.reason.trim().length > 0;
                 if (aHasReason && !bHasReason) return -1;
                 if (!aHasReason && bHasReason) return 1;
                 return 0;
             });
+
+            // Calculate max votes for percentage bars
+            const maxVotes = Math.max(...peerResponses.map(p => p.helpfulVotes), 1);
+            const totalHelpfulVotes = peerResponses.reduce((sum, p) => sum + p.helpfulVotes, 0);
 
             // Check if answer key has been revealed for this question
             const answerKeySection = document.getElementById(`answer-key-${questionId}`);
@@ -2684,7 +2698,7 @@ function renderLessonSelector(unitInfo) {
             console.log(`DEBUG populatePeerReasoning: ${questionId} - answerKeyRevealed: ${answerKeyRevealed}`);
 
             let html = '';
-            peerResponses.forEach(peer => {
+            peerResponses.forEach((peer, index) => {
                 const hasReason = peer.reason && peer.reason.trim().length > 0;
 
                 // Determine if this peer's answer is correct (only if answer key is revealed)
@@ -2699,10 +2713,37 @@ function renderLessonSelector(unitInfo) {
                     }
                 }
 
+                // Determine ranking badge and consensus level
+                let rankBadge = '';
+                let consensusLevel = '';
+                if (peer.helpfulVotes > 0 && !isCollegeBoard) {
+                    if (index === 0 && peer.helpfulVotes >= 3) {
+                        rankBadge = '🥇 #1';
+                        consensusLevel = 'high';
+                    } else if (index === 1 && peer.helpfulVotes >= 2) {
+                        rankBadge = '🥈 #2';
+                        consensusLevel = 'medium';
+                    } else if (index === 2 && peer.helpfulVotes >= 1) {
+                        rankBadge = '🥉 #3';
+                        consensusLevel = 'low';
+                    }
+                }
+
+                // Calculate vote percentage
+                const votePercentage = totalHelpfulVotes > 0 ? (peer.helpfulVotes / totalHelpfulVotes * 100).toFixed(0) : 0;
+                const barWidth = maxVotes > 0 ? (peer.helpfulVotes / maxVotes * 100) : 0;
+
+                // Check if current user voted on this response
+                const userVote = classData.users[currentUsername]?.votes?.[questionId]?.[peer.username];
+                const votedHelpful = userVote?.type === 'helpful';
+                const votedUnclear = userVote?.type === 'unclear';
+                const votedContradicts = userVote?.type === 'contradicts';
+
                 console.log(`DEBUG: Peer ${peer.username} - answer: ${peer.choice || peer.response}, isCorrect: ${isCorrect}, answerKeyRevealed: ${answerKeyRevealed}`);
 
                 html += `
-                    <div class="peer-response-card ${isCorrect ? 'correct' : 'incorrect'} ${isCollegeBoard ? 'college-board-official' : ''}">
+                    <div class="peer-response-card ${isCorrect ? 'correct' : 'incorrect'} ${isCollegeBoard ? 'college-board-official' : ''}" data-consensus="${consensusLevel}">
+                        ${rankBadge ? `<div class="answer-rank">${rankBadge}</div>` : ''}
                         <div class="peer-name">
                             ${isCollegeBoard ? '🏛️ College Board (Official)' : peer.username}
                             ${isCorrect || isCollegeBoard ? '✓' : ''}
@@ -2712,17 +2753,30 @@ function renderLessonSelector(unitInfo) {
                             <div class="peer-reasoning-text ${isCollegeBoard ? 'official-explanation' : ''}">${peer.reason}</div>
                         ` : '<div class="peer-reasoning-text" style="color: #999; font-style: italic;">No explanation provided</div>'}
 
+                        ${peer.helpfulVotes > 0 ? `
+                            <div class="vote-bar-container">
+                                <div class="vote-bar" style="width: ${barWidth}%"></div>
+                            </div>
+                        ` : ''}
+
                         ${peer.response && !isCollegeBoard ? `
-                            <div class="peer-voting-buttons" style="margin-top: 10px;">
-                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'helpful')" class="vote-btn helpful">
-                                    💡 Helpful (${getVoteCount(questionId, peer.username, 'helpful')})
+                            <div class="peer-voting-buttons">
+                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'helpful')" class="vote-btn helpful ${votedHelpful ? 'voted' : ''}">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <span class="vote-count">${peer.helpfulVotes}</span>
+                                    ${peer.helpfulVotes > 0 ? `<span class="vote-percentage">(${votePercentage}%)</span>` : ''}
                                 </button>
-                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'unclear')" class="vote-btn unclear">
-                                    🤔 Unclear (${getVoteCount(questionId, peer.username, 'unclear')})
+                                ${votedHelpful ? '<span class="your-vote-badge">Your vote!</span>' : ''}
+                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'unclear')" class="vote-btn unclear ${votedUnclear ? 'voted' : ''}">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span class="vote-count">${peer.unclearVotes}</span>
                                 </button>
-                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'contradicts')" class="vote-btn contradicts">
-                                    ⚔️ Contradicts (${getVoteCount(questionId, peer.username, 'contradicts')})
+                                ${votedUnclear ? '<span class="your-vote-badge unclear">Your vote</span>' : ''}
+                                <button onclick="voteFRQ('${questionId}', '${peer.username}', 'contradicts')" class="vote-btn contradicts ${votedContradicts ? 'voted' : ''}">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span class="vote-count">${peer.contradictsVotes}</span>
                                 </button>
+                                ${votedContradicts ? '<span class="your-vote-badge contradicts">Your vote</span>' : ''}
                             </div>
                         ` : ''}
                     </div>
