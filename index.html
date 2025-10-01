@@ -832,6 +832,9 @@
         let allCurriculumData = {}; // Store all units' data
         let qrCodesGenerated = false; // Track if QR codes have been generated
 
+        // TASK 4.1: Track activity listeners for cleanup (memory leak prevention)
+        let activityListeners = [];
+
 
         // Share Modal Functions
         function showShareModal() {
@@ -2382,6 +2385,9 @@ function renderLessonSelector(unitInfo) {
         window.loadLesson = function(lessonNumber) {
             currentLesson = lessonNumber;
 
+            // TASK 4.1: Clean up activity listeners before loading new lesson
+            cleanupActivityTracking();
+
             // Handle both numeric lessons and 'PC'
             if (lessonNumber === 'PC') {
                 currentQuestions = allUnitQuestions.filter(q => q.id.includes('-PC-'));
@@ -2405,6 +2411,9 @@ function renderLessonSelector(unitInfo) {
 
         // Back to units
         window.backToUnits = function() {
+            // TASK 4.1: Clean up activity listeners before returning to units
+            cleanupActivityTracking();
+
             // Clear any existing charts
             Object.values(chartInstances).forEach(chart => {
                 if (chart && typeof chart.destroy === 'function') {
@@ -2488,10 +2497,13 @@ function renderLessonSelector(unitInfo) {
 
         /**
          * TASK 3.3: Sets up event listeners for tracking user activity on questions
-         * Tracks when users start interacting with inputs (viewing/answering state)
+         * TASK 4.1: Now tracks listeners for cleanup (memory leak prevention)
          */
         function setupQuestionActivityTracking() {
             if (!currentQuestions || currentQuestions.length === 0) return;
+
+            // TASK 4.1: Clean up old listeners first
+            cleanupActivityTracking();
 
             currentQuestions.forEach(question => {
                 const questionId = question.id;
@@ -2499,47 +2511,72 @@ function renderLessonSelector(unitInfo) {
                 // Track radio button clicks (MC questions)
                 const radios = document.querySelectorAll(`input[name="choice-${questionId}"]`);
                 radios.forEach(radio => {
-                    radio.addEventListener('change', () => {
-                        updateUserActivity('answering', questionId);
-                    });
+                    const listener = () => updateUserActivity('answering', questionId);
+                    radio.addEventListener('change', listener);
+                    // TASK 4.1: Track for cleanup
+                    activityListeners.push({ element: radio, type: 'change', listener });
                 });
 
                 // Track textarea focus (FRQ questions) - debounced
                 const frqTextarea = document.getElementById(`frq-${questionId}`);
                 if (frqTextarea) {
                     let focusTimeout = null;
-                    frqTextarea.addEventListener('focus', () => {
+                    const focusListener = () => {
                         if (focusTimeout) clearTimeout(focusTimeout);
                         focusTimeout = setTimeout(() => {
                             updateUserActivity('answering', questionId);
-                        }, 1000); // Wait 1 second before marking as "answering"
-                    });
-
-                    // Clear timeout if they immediately blur
-                    frqTextarea.addEventListener('blur', () => {
+                        }, 1000);
+                    };
+                    const blurListener = () => {
                         if (focusTimeout) clearTimeout(focusTimeout);
-                    });
+                    };
+
+                    frqTextarea.addEventListener('focus', focusListener);
+                    frqTextarea.addEventListener('blur', blurListener);
+
+                    // TASK 4.1: Track for cleanup
+                    activityListeners.push({ element: frqTextarea, type: 'focus', listener: focusListener });
+                    activityListeners.push({ element: frqTextarea, type: 'blur', listener: blurListener });
                 }
 
                 // Track reasoning textarea focus - debounced
                 const reasonTextarea = document.getElementById(`reason-${questionId}`);
                 if (reasonTextarea) {
                     let focusTimeout = null;
-                    reasonTextarea.addEventListener('focus', () => {
+                    const focusListener = () => {
                         if (focusTimeout) clearTimeout(focusTimeout);
                         focusTimeout = setTimeout(() => {
                             updateUserActivity('answering', questionId);
-                        }, 1000); // Wait 1 second before marking as "answering"
-                    });
-
-                    // Clear timeout if they immediately blur
-                    reasonTextarea.addEventListener('blur', () => {
+                        }, 1000);
+                    };
+                    const blurListener = () => {
                         if (focusTimeout) clearTimeout(focusTimeout);
-                    });
+                    };
+
+                    reasonTextarea.addEventListener('focus', focusListener);
+                    reasonTextarea.addEventListener('blur', blurListener);
+
+                    // TASK 4.1: Track for cleanup
+                    activityListeners.push({ element: reasonTextarea, type: 'focus', listener: focusListener });
+                    activityListeners.push({ element: reasonTextarea, type: 'blur', listener: blurListener });
                 }
             });
 
-            console.log(`🐷 Activity tracking set up for ${currentQuestions.length} questions`);
+            console.log(`🐷 Activity tracking set up for ${currentQuestions.length} questions (${activityListeners.length} listeners)`);
+        }
+
+        /**
+         * TASK 4.1: Cleanup function to remove all activity tracking listeners
+         * Prevents memory leaks when switching lessons/units
+         */
+        function cleanupActivityTracking() {
+            activityListeners.forEach(({ element, type, listener }) => {
+                if (element) {
+                    element.removeEventListener(type, listener);
+                }
+            });
+            activityListeners = [];
+            console.log('🐷 Activity tracking listeners cleaned up');
         }
 
         // Render question
@@ -4698,14 +4735,54 @@ if (chartInstances[`dotplot-${questionId}`]) {
         }
 
         // Toggle multiplayer pigs
+        /**
+         * TASK 4.1: Updates pig system status indicator
+         * @param {string} status - 'active', 'syncing', 'error', or 'offline'
+         */
+        function updatePigSystemStatus(status) {
+            const button = document.querySelector('.pigs-toggle');
+            if (!button) return;
+
+            // Remove existing status dot
+            const existing = button.querySelector('.pig-status');
+            if (existing) existing.remove();
+
+            // Add new status dot
+            const statusDot = document.createElement('span');
+            statusDot.className = 'pig-status';
+
+            const colors = {
+                'active': '#4caf50',     // Green - syncing successfully
+                'syncing': '#ffc107',    // Yellow - currently syncing
+                'error': '#f44336',      // Red - error occurred
+                'offline': '#9e9e9e'     // Gray - offline mode
+            };
+
+            statusDot.style.cssText = `
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: ${colors[status] || colors['offline']};
+                box-shadow: 0 0 4px ${colors[status] || colors['offline']};
+                pointer-events: none;
+            `;
+
+            button.appendChild(statusDot);
+        }
+
         window.togglePigs = function() {
             if (!window.pigManager) {
                 // Initialize if not exists
                 window.pigManager = new PigManager();
                 showMessage('Multiplayer pigs enabled! 🐷', 'success');
+                updatePigSystemStatus(turboModeActive ? 'active' : 'offline');
             } else {
                 const enabled = window.pigManager.toggle();
                 showMessage(enabled ? 'Multiplayer pigs enabled! 🐷' : 'Multiplayer pigs disabled', 'info');
+                updatePigSystemStatus(enabled && turboModeActive ? 'active' : 'offline');
             }
 
             // Update button appearance
@@ -4945,6 +5022,8 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 this.pigs = new Map();
                 this.container = null;
                 this.enabled = localStorage.getItem('pigsEnabled') !== 'false';
+                // TASK 4.1: Debounce map to prevent duplicate pig creation
+                this.pigCreationDebounce = new Map();
                 if (this.enabled) {
                     this.init();
                 }
@@ -4974,22 +5053,34 @@ if (chartInstances[`dotplot-${questionId}`]) {
 
             addPeerPig(username, position = null) {
                 if (!this.enabled || !this.container) return;
-                if (this.pigs.has(username)) return;
                 if (username === currentUsername) return; // Don't create pig for current user
 
-                const pig = new PeerPig(username);
-                if (position) {
-                    pig.updatePosition(position.x, position.y, false);
+                // TASK 4.1: Debounce pig creation to prevent duplicates
+                if (this.pigCreationDebounce.has(username)) {
+                    clearTimeout(this.pigCreationDebounce.get(username));
                 }
 
-                this.pigs.set(username, pig);
-                this.container.appendChild(pig.element);
+                const timeout = setTimeout(() => {
+                    // Check again after debounce
+                    if (!this.pigs.has(username)) {
+                        const pig = new PeerPig(username);
+                        if (position) {
+                            pig.updatePosition(position.x, position.y, false);
+                        }
 
-                // Entrance animation
-                pig.element.classList.add('peer-pig-enter');
-                setTimeout(() => pig.element.classList.remove('peer-pig-enter'), 500);
+                        this.pigs.set(username, pig);
+                        this.container.appendChild(pig.element);
 
-                console.log(`🐷 Added peer pig for ${username}`);
+                        // Entrance animation
+                        pig.element.classList.add('peer-pig-enter');
+                        setTimeout(() => pig.element.classList.remove('peer-pig-enter'), 500);
+
+                        console.log(`🐷 Added peer pig for ${username}`);
+                    }
+                    this.pigCreationDebounce.delete(username);
+                }, 100); // 100ms debounce
+
+                this.pigCreationDebounce.set(username, timeout);
             }
 
             removePig(username) {
@@ -5093,12 +5184,20 @@ if (chartInstances[`dotplot-${questionId}`]) {
          * @param {string|null} questionId - Current question ID or null for idle
          */
         function updateUserActivity(state, questionId = null) {
-            if (!currentUsername) return;
+            if (!currentUsername || !classData) return;
 
-            // Update local classData
+            // TASK 4.1: Initialize if needed (race condition fix)
+            if (!classData.users) {
+                classData = { users: {} };
+            }
             if (!classData.users[currentUsername]) {
-                console.warn('User data not initialized for activity tracking');
-                return;
+                console.warn('User data not initialized for activity tracking, initializing...');
+                initClassData();
+                // Double-check after init
+                if (!classData.users[currentUsername]) {
+                    console.error('Failed to initialize user data for activity tracking');
+                    return;
+                }
             }
 
             const previousState = classData.users[currentUsername].currentActivity?.state;
@@ -5182,7 +5281,17 @@ if (chartInstances[`dotplot-${questionId}`]) {
                     .from('user_activity')
                     .upsert(activityData, { onConflict: 'username' });
 
-                if (error) throw error;
+                if (error) {
+                    // TASK 4.1: Handle missing table gracefully
+                    if (error.code === '42P01') { // PostgreSQL: relation does not exist
+                        console.warn('⚠️ user_activity table not found. Activity sync disabled.');
+                        console.log('To enable activity sync, create the table with:');
+                        console.log('CREATE TABLE user_activity (username TEXT PRIMARY KEY, activity_state TEXT, question_id TEXT, timestamp BIGINT);');
+                        stopActivityRefresh();
+                        return;
+                    }
+                    throw error;
+                }
                 console.log(`✅ Activity synced: ${username} ${state}`);
             } catch (error) {
                 console.error('❌ Error syncing activity:', error);
@@ -5195,6 +5304,9 @@ if (chartInstances[`dotplot-${questionId}`]) {
         async function pullPeerActivityFromSupabase() {
             if (!turboModeActive || !supabase) return;
 
+            // TASK 4.1: Update status indicator
+            updatePigSystemStatus('syncing');
+
             try {
                 const currentUser = localStorage.getItem('consensusUsername');
                 if (!currentUser) return;
@@ -5206,7 +5318,11 @@ if (chartInstances[`dotplot-${questionId}`]) {
                     .gt('timestamp', Date.now() - 300000); // Only last 5 minutes
 
                 if (error) throw error;
-                if (!data || data.length === 0) return;
+                if (!data || data.length === 0) {
+                    // TASK 4.1: Success even if no data
+                    updatePigSystemStatus('active');
+                    return;
+                }
 
                 // Process activity updates
                 data.forEach(activity => {
@@ -5259,8 +5375,13 @@ if (chartInstances[`dotplot-${questionId}`]) {
                     window.pigManager.updatePigPositions();
                 }
 
+                // TASK 4.1: Update status indicator to active after success
+                updatePigSystemStatus('active');
+
             } catch (error) {
                 console.error('❌ Error pulling peer activity:', error);
+                // TASK 4.1: Update status indicator to error
+                updatePigSystemStatus('error');
             }
         }
 

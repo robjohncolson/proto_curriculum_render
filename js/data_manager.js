@@ -29,6 +29,16 @@ function initClassData() {
                 lastUpdate: Date.now() // Timestamp of last activity change
             }
         };
+    } else {
+        // TASK 4.1: Migrate existing users to have currentActivity field
+        if (!classData.users[currentUsername].currentActivity) {
+            classData.users[currentUsername].currentActivity = {
+                state: 'idle',
+                questionId: null,
+                lastUpdate: Date.now()
+            };
+            console.log(`✅ Migrated ${currentUsername} to include currentActivity field`);
+        }
     }
 
     saveClassData();
