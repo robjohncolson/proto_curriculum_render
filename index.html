@@ -143,6 +143,7 @@
 <script src="data/curriculum.js"></script>
     <script src="data/units.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/data_manager.js"></script>
     <script>
 
         // ========================================
@@ -935,31 +936,7 @@
             9: { name: 'Inference for Slopes', lessons: 2 }
         };
 
-        // Initialize class data
-        function initClassData() {
-            let classDataStr = localStorage.getItem('classData');
-            classData = classDataStr ? JSON.parse(classDataStr) : {users: {}};
-
-            if (!classData.users[currentUsername]) {
-                classData.users[currentUsername] = {
-                    answers: {},
-                    reasons: {},
-                    timestamps: {},
-                    attempts: {}
-                };
-            }
-
-            saveClassData();
-        }
-
-        function saveClassData() {
-            try {
-                localStorage.setItem('classData', JSON.stringify(classData));
-            } catch(e) {
-                console.log("Storage quota exceeded");
-                showMessage("Warning: Local storage is full. Some data may not be saved.", 'error');
-            }
-        }
+        // Initialize class data - moved to js/data_manager.js
 
         // Student Performance Badges
         function calculateBadges(username) {
@@ -2154,40 +2131,7 @@ if (continueBtn) {
         // Call this function whenever currentUsername changes
         // Username display functions - moved to js/auth.js
 
-        function initializeFromEmbeddedData() {
-            // Parse embedded curriculum
-            allCurriculumData = {};
-            const allQuestions = EMBEDDED_CURRICULUM.questions || EMBEDDED_CURRICULUM;
-
-            // Group by units
-            const unitGroups = {};
-            allQuestions.forEach(question => {
-                const unitMatch = question.id.match(/U(\d+)/i);
-                if (unitMatch) {
-                    const unitNum = parseInt(unitMatch[1]);
-                    if (!unitGroups[unitNum]) {
-                        unitGroups[unitNum] = [];
-                    }
-                    unitGroups[unitNum].push(question);
-                }
-            });
-
-            // Process each unit
-            Object.keys(unitGroups).forEach(unitNum => {
-                const unitQuestions = unitGroups[unitNum];
-                const unitInfo = detectUnitAndLessons(unitQuestions);
-                if (unitInfo) {
-                    allCurriculumData[unitNum] = {
-                        questions: unitQuestions,
-                        unitInfo: unitInfo,
-                        fileName: `Unit ${unitNum}`
-                    };
-                }
-            });
-
-            // Go straight to unit menu
-            renderUnitMenu();
-        }
+        // Curriculum initialization - moved to js/data_manager.js
 
         // Unit selector - REMOVED: No longer needed due to CORS issues
         // function renderUnitSelector() {
@@ -4293,83 +4237,7 @@ if (chartInstances[`dotplot-${questionId}`]) {
         }
 
         // Export personal data
-        window.exportPersonal = function() {
-            const personalData = {
-                exportTime: new Date().toISOString(),
-                username: currentUsername,
-                users: {
-                    [currentUsername]: classData.users[currentUsername]
-                }
-            };
-            
-            const blob = new Blob([JSON.stringify(personalData, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${currentUsername}_data.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showMessage('Personal data exported successfully!', 'success');
-        }
-
-        // Export master database with all data
-        window.exportMasterData = function() {
-            // Get ALL data from localStorage, not filtered by user
-            const masterData = {
-                timestamp: new Date().toISOString(),
-                exportType: 'master_database',
-                allUsers: Object.keys(localStorage)
-                    .filter(key => key.includes('_username') || key.includes('answers_'))
-                    .map(key => key.split('_')[1])
-                    .filter((v, i, a) => a.indexOf(v) === i), // unique usernames
-
-                // Get all class data without filtering
-                classData: JSON.parse(localStorage.getItem('classData') || '{}'),
-
-                // Get all answers from all users
-                allAnswers: {},
-
-                // Get all progress from all users
-                allProgress: {},
-
-                // Get any other data structures you have
-                consensusData: JSON.parse(localStorage.getItem('consensusResponses') || '{}'),
-
-                // Include raw localStorage for complete backup
-                rawLocalStorage: {}
-            };
-
-            // Collect all answers for all users
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith('answers_')) {
-                    const username = key.replace('answers_', '');
-                    masterData.allAnswers[username] = JSON.parse(localStorage.getItem(key) || '{}');
-                }
-                if (key.startsWith('progress_')) {
-                    const username = key.replace('progress_', '');
-                    masterData.allProgress[username] = JSON.parse(localStorage.getItem(key) || '{}');
-                }
-
-                // Store everything in raw format too
-                masterData.rawLocalStorage[key] = localStorage.getItem(key);
-            });
-
-            // Create and download the file
-            const blob = new Blob([JSON.stringify(masterData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `master_database_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showMessage('Master database exported successfully!', 'success');
-        }
+        // Export functions - moved to js/data_manager.js
 
 
         // Import class data
