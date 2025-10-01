@@ -38,19 +38,24 @@
 
             <div class="sync-section">
                 <h3><i class="fas fa-user"></i> Student Actions</h3>
+                <div id="turboModeNotice" class="turbo-mode-notice" style="display: none;">
+                    <i class="fas fa-sync-alt"></i>
+                    <strong>Live Sync Active!</strong>
+                    <p>Your answers are being automatically synced to the cloud. Manual backups are optional.</p>
+                </div>
                 <div class="sync-buttons">
                     <button id="saveBtn" class="modal-btn">
-                        <i class="fas fa-save"></i>
+                        <i class="fas fa-download"></i>
                         <span>
-                            <strong>Save</strong>
-                            <small>Export your personal data</small>
+                            <strong>Backup My Answers</strong>
+                            <small>Download your progress as a file</small>
                         </span>
                     </button>
                     <button id="openBtn" class="modal-btn">
-                        <i class="fas fa-folder-open"></i>
+                        <i class="fas fa-upload"></i>
                         <span>
-                            <strong>Open</strong>
-                            <small>Import any database file</small>
+                            <strong>Restore from File</strong>
+                            <small>Import answers from a backup file</small>
                         </span>
                     </button>
                 </div>
@@ -62,15 +67,15 @@
                     <button id="masterExportBtn" class="modal-btn">
                         <i class="fas fa-database"></i>
                         <span>
-                            <strong>Master Export</strong>
-                            <small>Export all users' data</small>
+                            <strong>Export Class Data</strong>
+                            <small>Combine all students into one file</small>
                         </span>
                     </button>
                     <button id="masterImportBtn" class="modal-btn">
-                        <i class="fas fa-cloud-download-alt"></i>
+                        <i class="fas fa-users"></i>
                         <span>
-                            <strong>Master Import</strong>
-                            <small>Import peer data from master database</small>
+                            <strong>Import Class Data</strong>
+                            <small>Load peer answers from teacher's file</small>
                         </span>
                     </button>
                 </div>
@@ -6265,6 +6270,12 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 currentUserDisplay.textContent = localStorage.getItem('consensusUsername') || 'Unknown';
             }
 
+            // Show/hide turbo mode notice based on sync status
+            const turboModeNotice = document.getElementById('turboModeNotice');
+            if (turboModeNotice) {
+                turboModeNotice.style.display = turboModeActive ? 'block' : 'none';
+            }
+
             // Ensure Master Import button exists (add dynamically if missing)
             const masterExportBtn = document.getElementById('masterExportBtn');
             if (masterExportBtn && !document.getElementById('masterImportBtn')) {
@@ -6273,10 +6284,10 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 masterImportBtn.id = 'masterImportBtn';
                 masterImportBtn.className = 'modal-btn';
                 masterImportBtn.innerHTML = `
-                    <i class="fas fa-cloud-download-alt"></i>
+                    <i class="fas fa-users"></i>
                     <span>
-                        <strong>Master Import</strong>
-                        <small>Import peer data from master database</small>
+                        <strong>Import Class Data</strong>
+                        <small>Load peer answers from teacher's file</small>
                     </span>
                 `;
                 masterExportBtn.parentNode.appendChild(masterImportBtn);
