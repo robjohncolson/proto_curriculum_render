@@ -35,11 +35,16 @@ npx live-server .
 
 ### Git Workflow
 ```bash
-# Recent development pattern focuses on function mapping and data management
-git status                  # Check modified files
+# Check current modifications (note: several files often have local changes)
+git status                  # Current modified: docs/student2username.csv, docs/users/ian_delarosa.json, js/charthelper.js, teacher_dashboard.html (deleted)
+
+# Standard commit workflow
 git add .                   # Stage all changes
 git commit -m "Description" # Commit with descriptive message
 git push origin main        # Push to main branch
+
+# Recent commits focus on removing multiplayer features and improving data management
+git log --oneline -5       # View recent commit history
 ```
 
 ## Architecture Overview
@@ -50,36 +55,42 @@ git push origin main        # Push to main branch
 - **Math Rendering**: MathJax 3
 - **QR Code Generation**: QRCode.js for sharing functionality
 - **Data Storage**: Browser localStorage + JSON file import/export
+- **Cloud Sync**: Supabase for real-time data synchronization
+- **Backend**: Railway integration for server-side operations
 - **Styling**: Custom CSS with dark/light theme support
 
 ### File Structure
 ```
 proto_curriculum_render/
-├── index.html              # Main application (6,159 lines) - contains ALL JavaScript
+├── index.html              # Main application (7,631 lines) - contains ALL JavaScript
 ├── css/
-│   └── styles.css          # Complete styling with theme support (3,369 lines)
+│   └── styles.css          # Complete styling with theme support (4,673 lines)
 ├── js/
 │   ├── charts.js          # Chart rendering logic (1,499 lines)
-│   └── charthelper.js     # Chart utility functions (27 lines)
+│   ├── charthelper.js     # Chart utility functions (27 lines)
+│   ├── data_manager.js    # Data management utilities (10 lines)
+│   └── auth.js            # Authentication helpers
 ├── data/
-│   ├── curriculum.js      # Complete AP Stats curriculum data (1.7MB)
+│   ├── curriculum.js      # Complete AP Stats curriculum data (~38,000 lines)
 │   └── units.js          # Unit structure and lesson organization (2,591 lines)
 ├── docs/
 │   ├── FOUNDATION_DOCUMENT.md              # Architecture philosophy & data models
 │   ├── advanced_combiner_tool.html        # Data aggregation utility
-│   ├── master_database_*.json             # Aggregated class data
 │   ├── master_peer_data_*.json           # Peer data snapshots
-│   ├── student2username.csv              # Username mapping
+│   ├── student2username.csv              # Real name to username mapping
 │   └── users/                            # Individual student JSON files
+├── supabase_config.js                     # Cloud sync configuration
+├── railway_config.js                      # Backend configuration
+├── railway_client.js                      # Backend client
+├── sync_diagnostics.js                    # Sync debugging utilities
 ├── CLAUDE.md                              # This development guide
-├── COMPREHENSIVE_FUNCTION_DOCUMENTATION.md  # Complete function reference
-└── example_multi_player_game/             # Separate multiplayer game project (see its own CLAUDE.md)
+└── COMPREHENSIVE_FUNCTION_DOCUMENTATION.md  # Complete function reference
 ```
 
 ### Application Architecture Patterns
 
 #### 1. **Monolithic JavaScript Architecture**
-- **Single HTML file contains all application logic** (6,159 lines)
+- **Single HTML file contains all application logic** (7,631 lines)
 - No module system - all functions in global scope
 - Script execution starts with `DOMContentLoaded` event
 - 110+ functions organized by functional area
@@ -107,9 +118,10 @@ Static Data -> Curriculum (questions, units, lessons)
 ## Recent Development Focus
 
 ### Active Development Areas (from git history)
-- **User Management**: Recent focus on username handling and data imports
+- **Multiplayer Features Removal**: Recent commits removing pig sprite multiplayer functionality
+- **User Management**: Focus on username handling and student data imports
 - **Peer Data Aggregation**: Advanced combining tools for class-wide data analysis
-- **Cloud Sync**: Modal adjustments and sync functionality improvements
+- **Cloud Sync**: Integration with Supabase and Railway for cloud persistence
 - **Data Loss Recovery**: Fixes for student data import after cache clearing
 
 ## Critical Development Information
@@ -170,14 +182,15 @@ Static Data -> Curriculum (questions, units, lessons)
 **Pattern**: Educational chart rendering with consensus visualization
 
 ### 4. **Data Sync & Import/Export System**
-**Files**: `index.html` (lines 578-1000)
+**Files**: `index.html` (lines 578-1000), `supabase_config.js`, `railway_client.js`
 **Key Functions**:
 - `saveToFile()` - Export student progress
 - `importFromFile()` - Import peer or personal data
 - `mergePeerData()` - Peer insight integration
-- Data migration functions for format compatibility
+- `handleSmartImport()` - Intelligent file import with format detection
+- Cloud sync via Supabase integration
 
-**Pattern**: File-based data exchange with automatic migration support
+**Pattern**: Hybrid file-based and cloud data exchange with automatic migration
 
 ### 5. **Theme & UI Management**
 **Files**: `css/styles.css`, `js/charthelper.js`
@@ -194,10 +207,11 @@ Static Data -> Curriculum (questions, units, lessons)
 - Progress tracking across units and lessons
 
 ### 7. **Data Aggregation Tools**
-**Files**: `docs/advanced_combiner_tool.html`, `docs/master_database_*.json`
+**Files**: `docs/advanced_combiner_tool.html`, `docs/master_peer_data_*.json`, `docs/student2username.csv`
 **Purpose**: Combine multiple student JSON files into master peer data
 **Usage**: Teacher/administrator tool for class-wide data analysis
 **Output**: Creates aggregated JSON files for peer learning features
+**Note**: `student2username.csv` maps real student names to fruit_animal usernames for transparency
 
 ## Data Models & Storage
 
@@ -292,18 +306,19 @@ Static Data -> Curriculum (questions, units, lessons)
 5. **Component Architecture**: Refactor to component-based structure
 
 ### Current Technical Debt
-- **Monolithic HTML**: 6,159 lines in single file needs modularization
+- **Monolithic HTML**: 7,631 lines in single file needs modularization
 - **Global Functions**: 110+ functions in global namespace
 - **No Dependency Management**: Manual CDN management for external libraries
 - **Manual Testing Only**: No automated test coverage
+- **Mixed Cloud/Local Storage**: Hybrid Supabase + localStorage approach needs consolidation
 
 ## Key Files for Future Development
 
 ### Critical Files to Understand First
-1. **`index.html`** - Main application logic (6,159 lines)
+1. **`index.html`** - Main application logic (7,631 lines)
 2. **`docs/FOUNDATION_DOCUMENT.md`** - Architecture philosophy
 3. **`COMPREHENSIVE_FUNCTION_DOCUMENTATION.md`** - Complete function reference
-4. **`data/curriculum.js`** - Question database (1.7MB)
+4. **`data/curriculum.js`** - Question database (~38,000 lines)
 5. **`js/charts.js`** - Visualization logic (1,499 lines)
 
 ### Development Entry Points
