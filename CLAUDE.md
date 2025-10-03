@@ -35,16 +35,13 @@ npx live-server .
 
 ### Git Workflow
 ```bash
-# Check current modifications (note: several files often have local changes)
-git status                  # Current modified: docs/student2username.csv, docs/users/ian_delarosa.json, js/charthelper.js, teacher_dashboard.html (deleted)
+# Check current modifications
+git status                  # Often has local changes to user data files
 
 # Standard commit workflow
 git add .                   # Stage all changes
 git commit -m "Description" # Commit with descriptive message
 git push origin main        # Push to main branch
-
-# Recent commits focus on removing multiplayer features and improving data management
-git log --oneline -5       # View recent commit history
 ```
 
 ## Architecture Overview
@@ -118,10 +115,10 @@ Static Data -> Curriculum (questions, units, lessons)
 ## Recent Development Focus
 
 ### Active Development Areas (from git history)
-- **Multiplayer Features Removal**: Recent commits removing pig sprite multiplayer functionality
-- **User Management**: Focus on username handling and student data imports
-- **Peer Data Aggregation**: Advanced combining tools for class-wide data analysis
-- **Cloud Sync**: Integration with Supabase and Railway for cloud persistence
+- **Sprite System**: Complete pig sprite system for gamification (see SPRITE_SYSTEM_COMPLETE.md)
+- **Multiplayer Features Removal**: Removed real-time multiplayer, kept sprite visuals
+- **Sync Optimization**: Railway/Supabase sync improvements (see SYNC_ANALYSIS.md, SYNC_OPTIMIZATION_SUMMARY.md)
+- **Turbo Mode**: Performance optimization system (see TURBO_MODE_SETUP.md)
 - **Data Loss Recovery**: Fixes for student data import after cache clearing
 
 ## Critical Development Information
@@ -262,27 +259,19 @@ Static Data -> Curriculum (questions, units, lessons)
 - **Timestamp Tracking**: All student actions timestamped for analytics
 - **Graceful Degradation**: Missing data handled without crashes
 
-## Testing & Debugging Approach
+## Testing & Debugging
 
-### Manual Testing Protocol
-1. **Username Generation**: Test random generation and import flows
-2. **Question Rendering**: Verify MathJax rendering and chart display
-3. **Data Persistence**: Test save/load cycles with localStorage
-4. **Peer Data Integration**: Test import/export with sample files
-5. **Theme Switching**: Verify dark/light mode functionality
-6. **Cross-browser**: Test in Chrome, Firefox, Safari
-
-### Debugging Tools
-- **Console Logging**: Extensive console output for data flows
-- **localStorage Inspector**: Browser dev tools for storage debugging
-- **Network Tab**: Monitor Chart.js and MathJax loading
-- **File System Access**: Test import/export functionality
+### Critical Testing Areas
+1. **Data Import/Export**: Test with sample files in `docs/users/`
+2. **Question Rendering**: Verify MathJax and chart display
+3. **Sync System**: Test Railway/Supabase integration with `sync_diagnostics.js`
+4. **Theme Switching**: Verify dark/light mode persistence
 
 ### Common Issues & Solutions
-- **MathJax Loading**: Check async script loading timing
-- **Chart Rendering**: Verify Chart.js canvas initialization
-- **File Import Failures**: Check JSON format and browser file access
-- **Theme Persistence**: Verify localStorage theme storage
+- **MathJax Not Rendering**: Check `window.MathJax.typesetPromise()` calls
+- **Chart Errors**: Ensure canvas exists before `buildChart()` call
+- **Import Failures**: Validate JSON structure with `validateStudentDataStructure()`
+- **Sync Issues**: Check Railway server status and Supabase connection
 
 ## Performance Considerations
 
@@ -296,21 +285,19 @@ Static Data -> Curriculum (questions, units, lessons)
 - **Event Listeners**: Proper cleanup to prevent memory leaks
 - **localStorage Limits**: Monitor storage usage with large peer datasets
 
-## Future Development Areas
+## Technical Debt & Constraints
 
-### Identified Enhancement Opportunities
-1. **Module System**: Convert to ES6 modules for better organization
-2. **Build Process**: Add webpack/vite for optimization
-3. **Testing Framework**: Implement Jest or similar for automated testing
-4. **TypeScript**: Add type safety for large codebase
-5. **Component Architecture**: Refactor to component-based structure
+### Current Architecture Limitations
+- **Monolithic HTML**: 7,631 lines in single file (intentional for simplicity)
+- **Global Functions**: 110+ functions in global namespace (no module system by design)
+- **CDN Dependencies**: Chart.js, MathJax loaded from CDNs (no build system)
+- **Manual Testing**: No automated tests (static HTML constraint)
 
-### Current Technical Debt
-- **Monolithic HTML**: 7,631 lines in single file needs modularization
-- **Global Functions**: 110+ functions in global namespace
-- **No Dependency Management**: Manual CDN management for external libraries
-- **Manual Testing Only**: No automated test coverage
-- **Mixed Cloud/Local Storage**: Hybrid Supabase + localStorage approach needs consolidation
+### Design Decisions
+- **No Build System**: Intentionally kept as static HTML for easy deployment
+- **File-Based Storage**: Core philosophy - "The File IS the Database"
+- **Global Scope**: Simplifies debugging in educational context
+- **Hybrid Storage**: localStorage for session, files for persistence
 
 ## Key Files for Future Development
 
@@ -330,28 +317,27 @@ Static Data -> Curriculum (questions, units, lessons)
 ## Common Development Tasks
 
 ### Adding New Questions
-1. Edit `data/curriculum.js` to add question objects
-2. Follow existing structure: `type`, `prompt`, `options`, `correctAnswer`
-3. Test question rendering and peer response display
-4. Verify MathJax rendering for mathematical notation
+```javascript
+// In data/curriculum.js, add to questions array:
+{
+  type: 'multiChoice',
+  topic: 'U1-L2-Q01',
+  prompt: 'Question text with $$LaTeX$$ support',
+  options: ['A', 'B', 'C', 'D', 'E'],
+  correctAnswer: 'B',
+  chart: { /* optional chart config */ }
+}
+```
 
-### Modifying Chart Behavior
-1. Edit functions in `js/charts.js`
-2. Use `buildChart()` as entry point for new chart types
-3. Ensure theme compatibility with both light/dark modes
-4. Test chart destruction and recreation for performance
+### Modifying User Import Logic
+- Primary function: `importDataForUser()` (index.html:~600)
+- Validation: `validateStudentDataStructure()` (index.html:~800)
+- Always test with files in `docs/users/` directory
 
-### Data Structure Changes
-1. Update validation in `validateStudentDataStructure()` (index.html:~800)
-2. Add migration logic in `importDataForUser()` for backward compatibility
-3. Test import/export functionality thoroughly
-4. Update sample files in `docs/sample_users/`
-
-### UI/UX Changes
-1. Modify HTML structure in `index.html`
-2. Update CSS in `css/styles.css` with theme awareness
-3. Test responsive behavior across screen sizes
-4. Verify accessibility with screen readers
+### Adding Cloud Sync Features
+- Railway client: `railway_client.js`
+- Supabase config: `supabase_config.js`
+- Diagnostics: `sync_diagnostics.js`
 
 ---
 

@@ -150,13 +150,13 @@ class Sprite {
     draw(ctx, spriteSheet, frameAtlas) {
         if (!spriteSheet || !spriteSheet.complete) return;
 
-        const { frameWidth, frameHeight, cols } = frameAtlas;
+        const { frameWidth, frameHeight, cols, paddingX, paddingY } = frameAtlas;
 
-        // Calculate source position in sprite sheet
+        // Calculate source position in sprite sheet, accounting for padding
         const col = this.frameIndex % cols;
         const row = Math.floor(this.frameIndex / cols);
-        const sx = col * frameWidth;
-        const sy = row * frameHeight;
+        const sx = col * (frameWidth + paddingX);
+        const sy = row * (frameHeight + paddingY);
 
         // Save context state
         ctx.save();
@@ -178,11 +178,12 @@ class Sprite {
             ctx.filter = `hue-rotate(${this.hue}deg)`;
         }
 
-        // Draw sprite frame
+        // Draw sprite centered at the new origin (0,0) after translation
         ctx.drawImage(
             spriteSheet,
             sx, sy, frameWidth, frameHeight,  // Source rectangle
-            -16, -30, 32, 32                   // Destination (centered)
+            -frameWidth / 2, -frameHeight,    // Destination (draw centered and above the y-position "feet")
+            frameWidth, frameHeight
         );
 
         // Reset filter for text
@@ -256,12 +257,14 @@ class SpriteManager {
         this.lastFrameTime = 0;
         this.enabled = true;
 
-        // Frame atlas for sprite sheet (352x64, 11x2 grid, 32x32 frames)
+        // Frame atlas for sprite sheet (920x196, 11x2 grid, 80x96 frames, 4px padding)
         this.frameAtlas = {
-            frameWidth: 32,
-            frameHeight: 32,
+            frameWidth: 80,
+            frameHeight: 96,
             cols: 11,
-            rows: 2
+            rows: 2,
+            paddingX: 4,
+            paddingY: 4
         };
 
         // Initialize
@@ -294,11 +297,13 @@ class SpriteManager {
         this.canvas.style.pointerEvents = 'none'; // Don't block clicks
         this.canvas.style.zIndex = '150'; // Above main UI, below modals
 
-        // Set canvas dimensions with DPR scaling
+        // Get context FIRST
+        this.ctx = this.canvas.getContext('2d');
+
+        // Set canvas dimensions and scale context AFTER getting context
         this.setCanvasDimensions();
 
-        // Get context and configure
-        this.ctx = this.canvas.getContext('2d');
+        // Configure context
         this.ctx.imageSmoothingEnabled = false; // Pixel art style
 
         // Append to body
@@ -342,6 +347,8 @@ class SpriteManager {
         this.spriteSheet.src = this.options.spriteSheetSrc || (typeof SPRITE_BASE64 !== 'undefined' ? SPRITE_BASE64 : '');
 
         this.spriteSheet.onload = () => {
+            console.log('Sprite Sheet Natural Dimensions:', this.spriteSheet.naturalWidth, 'x', this.spriteSheet.naturalHeight);
+            console.assert(this.spriteSheet.naturalWidth === 920 && this.spriteSheet.naturalHeight === 196, "Sprite sheet dimensions are incorrect! Expected 920x196.");
             this.isSpriteSheetLoaded = true;
             console.log('Sprite sheet loaded successfully');
 
@@ -431,8 +438,12 @@ class SpriteManager {
         const deltaTime = now - this.lastFrameTime;
         this.lastFrameTime = now;
 
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Reset transform and apply DPR scaling robustly at the start of every frame
+        const dpr = window.devicePixelRatio || 1;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Clear canvas using CSS units, not physical pixels
+        this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
 
         // Update and draw all sprites
         this.sprites.forEach(sprite => {

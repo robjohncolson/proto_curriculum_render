@@ -7581,6 +7581,11 @@ if (chartInstances[`dotplot-${questionId}`]) {
                 console.log('Turbo mode initialization error:', error);
             });
 
+            // Initialize sprite system with external sprite sheet
+            window.spriteManager = new SpriteManager({
+                spriteSheetSrc: 'sprite.png'
+            });
+
             // Set up sync button
             const syncBtn = document.getElementById('syncBtn');
             if (syncBtn) {
